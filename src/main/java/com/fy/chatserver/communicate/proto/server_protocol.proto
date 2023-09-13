@@ -1,0 +1,21 @@
+syntax="proto3";
+import "client_protocol.proto";
+option java_outer_classname="ServerProto";
+option java_package="com.fy.chatserver.communicate";
+option optimize_for=SPEED;
+
+
+message SInner {
+  DataType type=1;
+  oneof data {
+    ServerMsg msg=2;
+    Notification notification=3;
+    Heartbeat heartbeat=4;
+  }
+}
+
+message ServerMsg {
+  string serverId=1;
+  int64 ack=2;
+  Msg msg=3;
+}
