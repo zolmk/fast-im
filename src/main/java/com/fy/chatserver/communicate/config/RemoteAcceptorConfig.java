@@ -1,6 +1,7 @@
 package com.fy.chatserver.communicate.config;
 
 import com.fy.chatserver.communicate.NamedChannelHandler;
+import com.fy.chatserver.communicate.ProtobufProvider;
 import com.fy.chatserver.communicate.proto.ServerProto;
 import com.google.protobuf.MessageLite;
 import io.netty.util.NettyRuntime;
@@ -36,7 +37,7 @@ public class RemoteAcceptorConfig extends AcceptorConfig {
 
     @Override
     public MessageLite getMessageLite() {
-        return ServerProto.ServerMsg.getDefaultInstance();
+        return ProtobufProvider.forServer();
     }
 
     @Override

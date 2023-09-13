@@ -27,8 +27,9 @@ public class App {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         } finally {
-            if (msgManager != null)
+            if (msgManager != null) {
                 msgManager.close();
+            }
         }
 
 

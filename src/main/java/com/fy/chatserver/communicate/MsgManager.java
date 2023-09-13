@@ -5,10 +5,7 @@ import com.fy.chatserver.common.CircleSet;
 import com.fy.chatserver.common.CsThreadFactory;
 import com.fy.chatserver.common.Dispatcher;
 import com.fy.chatserver.common.SyncCircleSet;
-import com.fy.chatserver.communicate.config.AcceptorConfig;
-import com.fy.chatserver.communicate.config.RemoteAcceptorConfig;
-import com.fy.chatserver.communicate.config.SslConfig;
-import com.fy.chatserver.communicate.config.UserAcceptorConfig;
+import com.fy.chatserver.communicate.config.*;
 import com.fy.chatserver.communicate.proto.ClientProto;
 import com.fy.chatserver.communicate.proto.ServerProto;
 import com.fy.chatserver.communicate.utils.ProtocolUtil;
@@ -33,29 +30,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  **/
 
 public class MsgManager implements Closeable {
-    private final static Logger LOG = LoggerFactory.getLogger(MsgManager.class);
-    private final AtomicInteger outDispatcherCount = new AtomicInteger(1);
-    private final AtomicInteger inDispatcherCount = new AtomicInteger(1);
-    private final int defaultDispatcherCount = 2;
-
-    private final int defaultOutAndInQueueCapacity = 200;
-    private final String curServiceId;
-
-    private final ConcurrentMap<String, UserChannel> userChannelMap;
-    private final ConcurrentHashSet<String> userChannelIdsSet;
-    private final ConcurrentMap<String, RemotePeer> remotePeerMap;
-
-    private final CircleSet<OutDispatcher> outDispatchers;
-    private final CircleSet<InDispatcher> inDispatchers;
-    private final ChannelChecker channelChecker;
-
-    private final ServiceFinder serviceFinder;
-
-    private final Accepter userAccepter;
-
-    private final SslConfig sslConfig;
-    private final Accepter remoteAccepter;
-
 
     public MsgManager(Properties properties) {
         this.remotePeerMap = new ConcurrentHashMap<>();
@@ -70,8 +44,8 @@ public class MsgManager implements Closeable {
         AcceptorConfig userAcceptorConfig = new UserAcceptorConfig(UserChannelHandler::new);
         userAcceptorConfig.load(properties);
 
-        this.sslConfig = new SslConfig();
-        this.sslConfig.load(properties);
+        this.remoteChannelConfig = new RemoteChannelConfig(new RemoteChannelHandler());
+        this.remoteChannelConfig.load(properties);
 
         AcceptorConfig remoteAcceptorConfig = new RemoteAcceptorConfig(RemoteChannelHandler::new);
         remoteAcceptorConfig.load(properties);
@@ -97,6 +71,30 @@ public class MsgManager implements Closeable {
         }
     }
 
+    private final static Logger LOG = LoggerFactory.getLogger(MsgManager.class);
+    private final AtomicInteger outDispatcherCount = new AtomicInteger(1);
+    private final AtomicInteger inDispatcherCount = new AtomicInteger(1);
+    private final int defaultDispatcherCount = 2;
+
+    private final int defaultOutAndInQueueCapacity = 200;
+    private final String curServiceId;
+
+    private final ConcurrentMap<String, UserChannel> userChannelMap;
+    private final ConcurrentHashSet<String> userChannelIdsSet;
+    private final ConcurrentMap<String, RemotePeer> remotePeerMap;
+
+    private final CircleSet<OutDispatcher> outDispatchers;
+    private final CircleSet<InDispatcher> inDispatchers;
+    private final ChannelChecker channelChecker;
+
+    private final ServiceFinder serviceFinder;
+
+    private final Accepter userAccepter;
+
+    private final RemoteChannelConfig remoteChannelConfig;
+    private final Accepter remoteAccepter;
+
+
     public void start() throws InterruptedException {
         this.userAccepter.start();
         this.remoteAccepter.start();
@@ -106,7 +104,7 @@ public class MsgManager implements Closeable {
     private void initDispatcher() {
         InDispatcher inDispatcher;
         OutDispatcher outDispatcher;
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < this.defaultDispatcherCount; i++) {
             inDispatcher = new InDispatcher();
             CsThreadFactory.getInstance().newThread(inDispatcher).start();
             this.inDispatchers.add(inDispatcher);
@@ -147,8 +145,8 @@ public class MsgManager implements Closeable {
         }
     }
 
-    private SslConfig getRemoteChannelConfig(String serviceId) {
-        return this.sslConfig;
+    private RemoteChannelConfig getRemoteChannelConfig(String serviceId) {
+        return this.remoteChannelConfig;
     }
 
 
@@ -275,14 +273,15 @@ public class MsgManager implements Closeable {
     }
 
     private RemotePeer createAndStartRemotePeer(String serviceId) {
-        SslConfig config = this.getRemoteChannelConfig(serviceId);
         InetSocketAddress isa = this.serviceFinder.getServiceAddress(serviceId);
         if (isa == null) {
             return null;
         }
         try {
-            IChannel iChannel = RemoteChannelFactory.newInstance(serviceId, isa, new RemoteChannelHandler(), config);
-            if (iChannel == null) return null;
+            IChannel iChannel = RemoteChannelFactory.newInstance(serviceId, isa,this.getRemoteChannelConfig(serviceId));
+            if (iChannel == null) {
+                return null;
+            }
             DefaultRemotePeerImpl remotePeer = new DefaultRemotePeerImpl(serviceId, iChannel);
             CsThreadFactory.getInstance().newThread(remotePeer).start();
             this.remotePeerMap.put(serviceId, remotePeer);
@@ -295,19 +294,41 @@ public class MsgManager implements Closeable {
     }
 
     class RemoteChannelHandler extends ChannelDuplexHandler implements NamedChannelHandler {
+        private String serviceId;
         private final MsgManager self = MsgManager.this;
 
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
             //TODO:互相交换身份信息，并在失去连接时，将自身从Map中删除
+            ctx.writeAndFlush(ProtocolUtil.registerNotification(ServerProto.SInner.getDefaultInstance(), self.curServiceId));
             super.channelActive(ctx);
         }
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
             if (msg instanceof ServerProto.SInner) {
-                ClientProto.CInner cInner = ProtocolUtil.s2c((ServerProto.SInner) msg);
-                MsgManager.this.nextIn(cInner);
+                ServerProto.SInner sInner = (ServerProto.SInner) msg;
+                if (ClientProto.DataType.MSG.equals(sInner.getType())) {
+                    ClientProto.CInner cInner = ProtocolUtil.s2c((ServerProto.SInner) msg);
+                    MsgManager.this.nextIn(cInner);
+                } else {
+                    switch (sInner.getType()) {
+                        case NOTIFICATION: {
+                            int code = sInner.getNotification().getCode();
+                            String data = sInner.getNotification().getMsg();
+                            if (Constants.REPLY_PEER_REGISTER == code) {
+                                this.serviceId = data;
+                                self.remotePeerMap.put(this.serviceId, new DefaultRemotePeerImpl(this.serviceId, new RemoteChannel(this.serviceId, ctx.channel())));
+                                return;
+                            }
+                        } break;
+                        case HEARTBEAT:
+                        case UNRECOGNIZED:
+                        default:{
+
+                        }break;
+                    }
+                }
             }
             super.channelRead(ctx, msg);
         }
@@ -315,12 +336,17 @@ public class MsgManager implements Closeable {
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
             LOG.error("exception: {}", cause.getMessage());
+            ctx.close();
             super.exceptionCaught(ctx, cause);
         }
 
         @Override
         public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
             LOG.info("channel unregistered.");
+            RemotePeer peer = self.remotePeerMap.remove(this.serviceId);
+            if (peer != null) {
+                peer.close();
+            }
             super.channelUnregistered(ctx);
         }
 

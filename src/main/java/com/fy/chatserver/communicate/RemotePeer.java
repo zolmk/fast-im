@@ -3,6 +3,7 @@ package com.fy.chatserver.communicate;
 
 import com.fy.chatserver.communicate.proto.ClientProto;
 import com.fy.chatserver.enums.ComponentStatus;
+import com.google.protobuf.MessageLite;
 import io.netty.util.concurrent.Future;
 
 import java.io.Closeable;
@@ -14,7 +15,7 @@ import java.io.Closeable;
 
 public interface RemotePeer extends Runnable, Closeable  {
     String serviceId();
-    Future<?> write(ClientProto.CInner protocol);
+    Future<?> write(MessageLite protocol);
     IChannel channel();
     ComponentStatus status();
 }

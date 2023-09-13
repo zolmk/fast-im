@@ -4,6 +4,7 @@ import com.fy.chatserver.communicate.proto.ClientProto;
 import com.fy.chatserver.communicate.proto.ServerProto;
 import com.fy.chatserver.communicate.utils.ProtocolUtil;
 import com.fy.chatserver.enums.ComponentStatus;
+import com.google.protobuf.MessageLite;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.FailedFuture;
 import io.netty.util.concurrent.Future;
@@ -21,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DefaultRemotePeerImpl implements RemotePeer {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultRemotePeerImpl.class);
-    private final LinkedBlockingQueue<ClientProto.CInner> queue;
+    private final LinkedBlockingQueue<MessageLite> queue;
     private final ConcurrentMap<Integer, Future<?>> awaitFutureMap;
     private final IChannel remoteChannel;
     private final String serviceId;
@@ -44,7 +45,7 @@ public class DefaultRemotePeerImpl implements RemotePeer {
     }
 
     @Override
-    public Future<?> write(ClientProto.CInner protocol) {
+    public Future<?> write(MessageLite protocol) {
         if (this.status != ComponentStatus.RUNNING) {
             return new FailedFuture<>(GlobalEventExecutor.INSTANCE, new Throwable("The remote peer not start."));
         }
@@ -72,14 +73,16 @@ public class DefaultRemotePeerImpl implements RemotePeer {
         this.executeThread = Thread.currentThread();
         this.executeThread.setName(String.format("remote-peer-thread-%s", this.serviceId));
         int hashcode = 0;
-        ClientProto.CInner protocol = null;
+        MessageLite protocol = null;
         this.status = ComponentStatus.RUNNING;
         while (this.isRunning.get()) {
             try {
                 protocol = this.queue.poll(1000, TimeUnit.MILLISECONDS);
-                if (protocol == null) continue;
+                if (protocol == null) {
+                    continue;
+                }
                 hashcode = protocol.hashCode();
-                ServerProto.SInner serverProtocol = ProtocolUtil.c2s(protocol, this.serviceId, 0L);
+                MessageLite serverProtocol = ProtocolUtil.c2s((ClientProto.CInner) protocol, this.serviceId, 0L);
                 if (remoteChannel.isWritable()) {
                     int finalHashcode = hashcode;
                     this.remoteChannel.writeAndFlush(serverProtocol).addListener(future -> {

@@ -14,12 +14,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public abstract class Dispatcher<T> implements Closeable, Runnable {
-    protected final LinkedBlockingQueue<T> queue;
-    protected Thread runThread = null;
-    protected final AtomicBoolean running;
-    protected ComponentStatus status;
-    protected final Logger LOG;
-    protected final int createOrder;
 
     public Dispatcher(int queueCapacity, Logger logger, int order) {
         this.queue = new LinkedBlockingQueue<>(queueCapacity);
@@ -28,6 +22,14 @@ public abstract class Dispatcher<T> implements Closeable, Runnable {
         this.LOG = logger;
         this.createOrder = order;
     }
+
+    protected final LinkedBlockingQueue<T> queue;
+    protected Thread runThread = null;
+    protected final AtomicBoolean running;
+    protected ComponentStatus status;
+    protected final Logger LOG;
+    protected final int createOrder;
+
 
     @Override
     public void run() {

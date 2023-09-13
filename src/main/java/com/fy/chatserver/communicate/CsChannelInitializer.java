@@ -2,6 +2,7 @@ package com.fy.chatserver.communicate;
 
 import com.fy.chatserver.communicate.config.AcceptorConfig;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
@@ -30,10 +31,10 @@ public class CsChannelInitializer extends ChannelInitializer<NioSocketChannel> {
                 .addLast(new ProtobufVarint32FrameDecoder())
                 .addLast(new ProtobufEncoder())
                 .addLast(new ProtobufDecoder(this.config.getMessageLite()));
-        NamedChannelHandler handler = null;
-        for (Supplier<NamedChannelHandler> supplier : this.config.handlers()) {
-            handler = supplier.get();
-            ch.pipeline().addLast(handler.name(), handler);
-        }
+        ChannelPipeline pipeline = ch.pipeline();
+        this.config.handlers().forEach(namedChannelHandlerSupplier -> {
+            NamedChannelHandler handler = namedChannelHandlerSupplier.get();
+            pipeline.addLast(handler.name(), handler);
+        });
     }
 }
