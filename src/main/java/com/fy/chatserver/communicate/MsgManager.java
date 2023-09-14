@@ -11,8 +11,12 @@ import com.fy.chatserver.communicate.proto.ServerProto;
 import com.fy.chatserver.communicate.utils.ProtocolUtil;
 import com.fy.chatserver.discovery.ServiceFinder;
 import com.fy.chatserver.discovery.ServiceFinderProvider;
-import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,17 +41,25 @@ public class MsgManager implements Closeable {
         this.userChannelIdsSet = new ConcurrentHashSet<>();
         this.userChannelMap = new SyncSetConcurrentHashMap<>(this.userChannelIdsSet);
 
-        this.channelChecker = new ChannelChecker();
-        this.outDispatchers = new SyncCircleSet<>();
-        this.inDispatchers = new SyncCircleSet<>();
+        this.userStateSupervisor = new UserStateSupervisor();
+        this.remotePeerStateSupervisor = new RemotePeerStateSupervisor();
 
-        AcceptorConfig userAcceptorConfig = new UserAcceptorConfig(UserChannelHandler::new);
+        this.outDispatchers = new SyncCircleSet<>(this.defaultDispatcherCount, OutDispatcher::new);
+        this.inDispatchers = new SyncCircleSet<>(this.defaultDispatcherCount, InDispatcher::new);
+
+        this.remoteChannelMsgHandler = new RemoteChannelMsgHandler();
+
+        this.userChannelMsgHandler = new UserChannelMsgHandler();
+
+        this.unifiedHeartbeatHandler = new UnifiedHeartbeatHandler();
+
+        AcceptorConfig userAcceptorConfig = new UserAcceptorConfig(UserChannelNotificationHandler::new, ()->this.userChannelMsgHandler, ()->this.unifiedHeartbeatHandler);
         userAcceptorConfig.load(properties);
 
-        this.remoteChannelConfig = new RemoteChannelConfig(new RemoteChannelHandler());
+        this.remoteChannelConfig = new RemoteChannelConfig(this.remoteChannelMsgHandler, new RemoteChannelNotificationHandler(), this.unifiedHeartbeatHandler);
         this.remoteChannelConfig.load(properties);
 
-        AcceptorConfig remoteAcceptorConfig = new RemoteAcceptorConfig(RemoteChannelHandler::new);
+        AcceptorConfig remoteAcceptorConfig = new RemoteAcceptorConfig(()->this.remoteChannelMsgHandler, RemoteChannelNotificationHandler::new);
         remoteAcceptorConfig.load(properties);
 
         this.curServiceId = properties.getProperty("chat-server.service-id", "chat-server-0");
@@ -79,13 +91,15 @@ public class MsgManager implements Closeable {
     private final int defaultOutAndInQueueCapacity = 200;
     private final String curServiceId;
 
-    private final ConcurrentMap<String, UserChannel> userChannelMap;
+    private final ConcurrentMap<String, IChannel> userChannelMap;
     private final ConcurrentHashSet<String> userChannelIdsSet;
     private final ConcurrentMap<String, RemotePeer> remotePeerMap;
 
     private final CircleSet<OutDispatcher> outDispatchers;
     private final CircleSet<InDispatcher> inDispatchers;
-    private final ChannelChecker channelChecker;
+
+    private final UserStateSupervisor userStateSupervisor;
+    private final RemotePeerStateSupervisor remotePeerStateSupervisor;
 
     private final ServiceFinder serviceFinder;
 
@@ -94,25 +108,22 @@ public class MsgManager implements Closeable {
     private final RemoteChannelConfig remoteChannelConfig;
     private final Accepter remoteAccepter;
 
+    // shared
+    private final UserChannelMsgHandler userChannelMsgHandler;
+
+    // shared
+    private final RemoteChannelMsgHandler remoteChannelMsgHandler;
+
+    // shared
+    private final UnifiedHeartbeatHandler unifiedHeartbeatHandler;
+
 
     public void start() throws InterruptedException {
         this.userAccepter.start();
         this.remoteAccepter.start();
-        this.initDispatcher();
-    }
-
-    private void initDispatcher() {
-        InDispatcher inDispatcher;
-        OutDispatcher outDispatcher;
-        for (int i = 0; i < this.defaultDispatcherCount; i++) {
-            inDispatcher = new InDispatcher();
-            CsThreadFactory.getInstance().newThread(inDispatcher).start();
-            this.inDispatchers.add(inDispatcher);
-
-            outDispatcher = new OutDispatcher();
-            CsThreadFactory.getInstance().newThread(outDispatcher).start();
-            this.outDispatchers.add(outDispatcher);
-        }
+        // start dispatcher
+        this.inDispatchers.iter().forEachRemaining(inDispatcher -> CsThreadFactory.getInstance().newThread(inDispatcher).start());
+        this.outDispatchers.iter().forEachRemaining(outDispatcher -> CsThreadFactory.getInstance().newThread(outDispatcher).start());
     }
 
     /**
@@ -156,7 +167,6 @@ public class MsgManager implements Closeable {
         closeAll(outDispatchers.iter());
         closeAll(inDispatchers.iter());
         serviceFinder.close();
-        channelChecker.close();
         this.userAccepter.close();
         this.remoteAccepter.close();
     }
@@ -173,17 +183,78 @@ public class MsgManager implements Closeable {
         }
     }
 
-    class ChannelChecker implements Closeable {
+    /**
+     * create a new RemotePeer by service id, then start it.
+     * The function will obtain the remote address by ServiceFinder and connect it.
+     * @param serviceId service id
+     * @return RemotePeer
+     * @see ServiceFinder
+     * @see RemotePeer
+     */
+    private RemotePeer createAndStartRemotePeer(String serviceId) {
+        InetSocketAddress isa = this.serviceFinder.getServiceAddress(serviceId);
+        if (isa == null) {
+            return null;
+        }
+        try {
+            IChannel iChannel = RemoteChannelFactory.newInstance(serviceId, isa,this.getRemoteChannelConfig(serviceId));
+            if (iChannel == null) {
+                return null;
+            }
+            DefaultRemotePeerImpl remotePeer = new DefaultRemotePeerImpl(serviceId, iChannel);
+            CsThreadFactory.getInstance().newThread(remotePeer).start();
+            this.remotePeerMap.put(serviceId, remotePeer);
+            return remotePeer;
+        } catch (InterruptedException e) {
+            LOG.error("create remote peer occur error", e);
+            return null;
+        }
+
+    }
+
+    /**
+     * Use the class to manage uniformly login and logout of user.
+     */
+    class UserStateSupervisor {
         private MsgManager self = MsgManager.this;
+
         public boolean isLocal(String toId) {
             return self.userChannelIdsSet.contains(toId);
         }
 
-        @Override
-        public void close() throws IOException {
-            this.self.userChannelIdsSet.clear();
-            this.self = null;
+        public void login(String uid, Channel channel) {
+            IChannel userChannel = new UserChannel(self.curServiceId, channel);
+            self.serviceFinder.registerClient(self.curServiceId, uid);
+            self.userChannelMap.put(uid, userChannel);
+            LOG.info("User: {} login.", uid);
+        }
 
+        public void logout(String uid) {
+            self.serviceFinder.unregisterClient(self.curServiceId, uid);
+            self.userChannelMap.remove(uid);
+            LOG.info("User: {} logout.", uid);
+        }
+    }
+
+    class RemotePeerStateSupervisor {
+
+        private final MsgManager self = MsgManager.this;
+
+        public void connected(String sid, Channel channel) {
+            self.remotePeerMap.put(sid, new DefaultRemotePeerImpl(sid, new RemoteChannel(sid, channel)));
+            LOG.info("Service: {} connected.", sid);
+        }
+
+        public void disconnected(String sid) {
+            RemotePeer peer = self.remotePeerMap.remove(sid);
+            if (peer != null) {
+                try {
+                    peer.close();
+                } catch (IOException e) {
+                    LOG.error("RemotePeer occur exception when close it.", e);
+                }
+            }
+            LOG.info("Service: {} disconnected.", sid);
         }
     }
 
@@ -219,11 +290,11 @@ public class MsgManager implements Closeable {
                 return;
             }
             String toId = protocol.getMsg().getTo();
-            if (!MsgManager.this.channelChecker.isLocal(toId)) {
-                MsgManager.this.nextOut(protocol);
+            if (!self.userStateSupervisor.isLocal(toId)) {
+                self.nextOut(protocol);
                 return;
             }
-            UserChannel userChannel = self.userChannelMap.get(toId);
+            IChannel userChannel = self.userChannelMap.get(toId);
             userChannel.writeAndFlush(protocol);
         }
 
@@ -246,7 +317,7 @@ public class MsgManager implements Closeable {
                 return;
             }
             String toId = protocol.getMsg().getTo();
-            if (MsgManager.this.channelChecker.isLocal(toId)) {
+            if (MsgManager.this.userStateSupervisor.isLocal(toId)) {
                 MsgManager.this.nextIn(protocol);
                 return;
             }
@@ -272,37 +343,102 @@ public class MsgManager implements Closeable {
         }
     }
 
-    private RemotePeer createAndStartRemotePeer(String serviceId) {
-        InetSocketAddress isa = this.serviceFinder.getServiceAddress(serviceId);
-        if (isa == null) {
-            return null;
-        }
-        try {
-            IChannel iChannel = RemoteChannelFactory.newInstance(serviceId, isa,this.getRemoteChannelConfig(serviceId));
-            if (iChannel == null) {
-                return null;
+
+
+    @ChannelHandler.Sharable
+    static
+    class UnifiedHeartbeatHandler extends ChannelInboundHandlerAdapter implements NamedChannelHandler {
+        @Override
+        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+            if (evt instanceof IdleStateEvent) {
+                if (IdleState.WRITER_IDLE.equals(((IdleStateEvent) evt).state())) {
+                    /*
+                    Towards the user channel, the WRITE_IDLE event should be handled by the user.
+                    Towards the remote channel, the WRITE_IDLE event should be handled by all remote peer.
+                    That maybe set different value of writeIdleTime to accomplish it.
+                    */
+                    ctx.writeAndFlush(ProtocolUtil.newHeartbeat());
+                } else if (IdleState.READER_IDLE.equals(((IdleStateEvent) evt).state())) {
+                    LOG.info("The channel unread too many time. We will close it.");
+                    ctx.close();
+                }
+            } else {
+                super.userEventTriggered(ctx, evt);
             }
-            DefaultRemotePeerImpl remotePeer = new DefaultRemotePeerImpl(serviceId, iChannel);
-            CsThreadFactory.getInstance().newThread(remotePeer).start();
-            this.remotePeerMap.put(serviceId, remotePeer);
-            return remotePeer;
-        } catch (InterruptedException e) {
-            LOG.error("create remote peer occur error", e);
-            return null;
         }
-
-    }
-
-    class RemoteChannelHandler extends ChannelDuplexHandler implements NamedChannelHandler {
-        private String serviceId;
-        private final MsgManager self = MsgManager.this;
 
         @Override
-        public void channelActive(ChannelHandlerContext ctx) throws Exception {
-            //TODO:互相交换身份信息，并在失去连接时，将自身从Map中删除
-            ctx.writeAndFlush(ProtocolUtil.registerNotification(ServerProto.SInner.getDefaultInstance(), self.curServiceId));
-            super.channelActive(ctx);
+        public String name() {
+            return "unified-heartbeat-handler-shared";
         }
+    }
+
+    class RemoteChannelNotificationHandler extends ChannelInboundHandlerAdapter implements NamedChannelHandler {
+        private final MsgManager self;
+        private String serviceId;
+        public RemoteChannelNotificationHandler() {
+            this.self = MsgManager.this;
+            this.serviceId = null;
+        }
+
+        @Override
+        public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+            ctx.writeAndFlush(ProtocolUtil.newRegisterNotification(ServerProto.SInner.getDefaultInstance(), self.curServiceId));
+            super.handlerAdded(ctx);
+        }
+
+        @Override
+        public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+            if (msg instanceof ServerProto.SInner) {
+                ServerProto.SInner inner = (ServerProto.SInner) msg;
+                if (ClientProto.DataType.NOTIFICATION.equals(inner.getType())) {
+                    handleNotification(ctx, inner);
+                } else {
+                    ctx.fireChannelRead(msg);
+                }
+            }
+        }
+
+        @Override
+        public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+            if (this.serviceId != null) {
+                self.remotePeerStateSupervisor.disconnected(this.serviceId);
+            }
+            super.handlerRemoved(ctx);
+        }
+
+        @Override
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+            LOG.error("remote channel occur exception.", cause);
+            /* close the channel */
+            ctx.close();
+            super.exceptionCaught(ctx, cause);
+        }
+
+        private void handleNotification(ChannelHandlerContext ctx, ServerProto.SInner sInner) {
+            int code = sInner.getNotification().getCode();
+            String data = sInner.getNotification().getMsg();
+            if (Constants.REPLY_PEER_REGISTER == code) {
+                if (this.serviceId == null) {
+                    /* unregistered */
+                    this.serviceId = data;
+                    self.remotePeerStateSupervisor.connected(this.serviceId, ctx.channel());
+                } else if (this.serviceId.equals(data)) {
+                    LOG.info("the service has multiple registration. We will ignore the reply for registration.");
+                } else {
+                    LOG.error("the service has wrong state. We will close the remote channel");
+                    ctx.close();
+                }
+            }
+        }
+        @Override
+        public String name() {
+            return String.format("remote-channel-notification-handler-%s", this.serviceId);
+        }
+    }
+
+    @ChannelHandler.Sharable
+    class RemoteChannelMsgHandler extends ChannelInboundHandlerAdapter implements NamedChannelHandler {
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -312,134 +448,103 @@ public class MsgManager implements Closeable {
                     ClientProto.CInner cInner = ProtocolUtil.s2c((ServerProto.SInner) msg);
                     MsgManager.this.nextIn(cInner);
                 } else {
-                    switch (sInner.getType()) {
-                        case NOTIFICATION: {
-                            int code = sInner.getNotification().getCode();
-                            String data = sInner.getNotification().getMsg();
-                            if (Constants.REPLY_PEER_REGISTER == code) {
-                                this.serviceId = data;
-                                self.remotePeerMap.put(this.serviceId, new DefaultRemotePeerImpl(this.serviceId, new RemoteChannel(this.serviceId, ctx.channel())));
-                                return;
-                            }
-                        } break;
-                        case HEARTBEAT:
-                        case UNRECOGNIZED:
-                        default:{
-
-                        }break;
-                    }
+                    ctx.fireChannelRead(msg);
                 }
             }
-            super.channelRead(ctx, msg);
-        }
-
-        @Override
-        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-            LOG.error("exception: {}", cause.getMessage());
-            ctx.close();
-            super.exceptionCaught(ctx, cause);
-        }
-
-        @Override
-        public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-            LOG.info("channel unregistered.");
-            RemotePeer peer = self.remotePeerMap.remove(this.serviceId);
-            if (peer != null) {
-                peer.close();
-            }
-            super.channelUnregistered(ctx);
         }
 
         @Override
         public String name() {
-            return "remote-handler";
+            return "remote-channel-msg-handler-shared";
         }
     }
 
-    class UserChannelHandler extends ChannelDuplexHandler implements NamedChannelHandler {
+
+
+    class UserChannelNotificationHandler extends ChannelInboundHandlerAdapter implements NamedChannelHandler {
         private boolean isRegister;
         private final MsgManager self;
-        public UserChannelHandler() {
+        private String clientId = null;
+        public UserChannelNotificationHandler() {
             this.isRegister = false;
             this.self = MsgManager.this;
         }
         @Override
-        public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-            super.channelRegistered(ctx);
-        }
-
-        @Override
-        public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-            super.channelUnregistered(ctx);
-        }
-
-        @Override
-        public void channelActive(ChannelHandlerContext ctx) throws Exception {
-            super.channelActive(ctx);
-        }
-
-        @Override
-        public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-            super.channelInactive(ctx);
-        }
-
-        @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-            if (msg instanceof ClientProto.CInner) {
-                ClientProto.CInner inner = (ClientProto.CInner) msg;
-                if (inner.getType() == ClientProto.DataType.MSG) {
-                    nextOut(inner);
-                    if (!isRegister) {
-                        sendRegisterNotification(ctx);
+            if (this.isRegister) {
+                ctx.fireChannelRead(msg);
+            } else {
+                if (msg instanceof ClientProto.CInner) {
+                    ClientProto.CInner inner = (ClientProto.CInner) msg;
+                    if (ClientProto.DataType.NOTIFICATION.equals(inner.getType())) {
+                        handlerNotification(ctx, inner);
+                    } else {
+                        ctx.fireChannelRead(msg);
                     }
-                    return;
+                } else {
+                    LOG.info("unknown type {}", msg.getClass().getName());
                 }
-                switch (inner.getType()) {
-                    case HEARTBEAT:break;
-                    case NOTIFICATION: {
-                        handlerNotification(ctx,inner);
-                    } break;
-                    case UNRECOGNIZED: {
-                        LOG.info("unknown message {}", inner);
-                    }break;
+                if (!this.isRegister) {
+                    sendRegisterNotification(ctx);
                 }
             }
+        }
 
-            super.channelRead(ctx, msg);
+        private void handlerNotification(ChannelHandlerContext ctx, ClientProto.CInner inner) {
+            ClientProto.Notification notification = inner.getNotification();
+            if (notification.getCode() == Constants.REPLY_PEER_REGISTER && !this.isRegister) {
+                // register the channel
+                this.clientId = notification.getMsg();;
+                self.userStateSupervisor.login(this.clientId, ctx.channel());
+                this.isRegister = true;
+            }
         }
 
         private void sendRegisterNotification(ChannelHandlerContext ctx) {
             ClientProto.CInner.Builder builder = ClientProto.CInner.newBuilder();
             builder.setType(ClientProto.DataType.NOTIFICATION)
-                    .setNotification(ClientProto.Notification.newBuilder().setCode(0).build());
+                    .setNotification(ClientProto.Notification.newBuilder().setCode(Constants.NOTE_PEER_REGISTER).build());
             ctx.writeAndFlush(builder.build());
         }
 
         @Override
-        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-            super.userEventTriggered(ctx, evt);
+        public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+            self.userStateSupervisor.logout(this.clientId);
+            super.handlerRemoved(ctx);
         }
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
             LOG.error("user channelHandler occur exception.", cause);
-        }
-
-        private void handlerNotification(ChannelHandlerContext ctx, ClientProto.CInner inner) {
-            ClientProto.Notification notification = inner.getNotification();
-            if (notification.getCode() == 0 && !this.isRegister) {
-                // register the channel
-                String clientId = notification.getMsg();
-                UserChannel userChannel = new UserChannel(self.curServiceId, ctx.channel());
-                self.serviceFinder.registerClient(self.curServiceId, clientId);
-                self.userChannelMap.put(clientId, userChannel);
-                this.isRegister = true;
-            }
+            /* close the channel when the channel occur exception */
+            ctx.close();
         }
 
         @Override
         public String name() {
-            return "user-handler";
+            return String.format("user-channel-notification-handler-%s", this.clientId);
+        }
+    }
+
+    @ChannelHandler.Sharable
+    class UserChannelMsgHandler extends ChannelInboundHandlerAdapter implements NamedChannelHandler {
+        private final MsgManager self;
+        public UserChannelMsgHandler() {
+            this.self = MsgManager.this;
+        }
+
+        @Override
+        public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+            ClientProto.CInner inner = (ClientProto.CInner) msg;
+            if (inner.getType() == ClientProto.DataType.MSG) {
+                self.nextOut(inner);
+            } else {
+                ctx.fireChannelRead(msg);
+            }
+        }
+        @Override
+        public String name() {
+            return "user-channel-msg-handler-shared";
         }
     }
 }

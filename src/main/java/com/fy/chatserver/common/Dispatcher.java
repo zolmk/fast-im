@@ -35,6 +35,7 @@ public abstract class Dispatcher<T> implements Closeable, Runnable {
     public void run() {
         this.initThread();
         this.status = ComponentStatus.RUNNING;
+        LOG.info("{} started.", name());
         while (this.running.get()) {
             try {
                 T protocol = this.queue.poll(1000, TimeUnit.MILLISECONDS);

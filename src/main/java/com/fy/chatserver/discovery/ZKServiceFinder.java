@@ -86,7 +86,16 @@ public class ZKServiceFinder implements ServiceFinder{
         try {
             this.client.create().withMode(CreateMode.EPHEMERAL).forPath(toClientPath(clientId), serviceId.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("occur error when register client.", e);
+        }
+    }
+
+    @Override
+    public void unregisterClient(String serviceId, String clientId) {
+        try {
+            this.client.delete().forPath(toClientPath(clientId));
+        } catch (Exception e) {
+            LOG.error("occur error when unregister client.", e);
         }
     }
 
@@ -97,6 +106,11 @@ public class ZKServiceFinder implements ServiceFinder{
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void unregisterServer(String serviceId) {
+
     }
 
     @Override

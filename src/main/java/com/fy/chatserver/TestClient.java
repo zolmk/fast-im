@@ -85,7 +85,7 @@ public class TestClient {
 
     public static void register(String selfId) {
         channel.writeAndFlush(ClientProto.CInner.newBuilder().setType(ClientProto.DataType.NOTIFICATION).setNotification(
-                ClientProto.Notification.newBuilder().setCode(0).setMsg(selfId).build()
+                ClientProto.Notification.newBuilder().setCode(1).setMsg(selfId).build()
         ).build());
     }
 

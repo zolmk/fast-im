@@ -38,9 +38,22 @@ public interface ServiceFinder extends Closeable {
     void registerClient(String serviceId, String clientId);
 
     /**
+     * unregister the client to service
+     * @param serviceId service id
+     * @param clientId client id
+     */
+    void unregisterClient(String serviceId, String clientId);
+
+    /**
      * register service
      * @param serviceId service id
      * @param connectString connect string
      */
     void registerServer(String serviceId, String connectString);
+
+    /**
+     * unregister service
+     * @param serviceId service id
+     */
+    void unregisterServer(String serviceId);
 }

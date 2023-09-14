@@ -34,7 +34,17 @@ public class LocalServiceFinder implements ServiceFinder {
     }
 
     @Override
+    public void unregisterClient(String serviceId, String clientId) {
+
+    }
+
+    @Override
     public void registerServer(String serviceId, String connectString) {
+
+    }
+
+    @Override
+    public void unregisterServer(String serviceId) {
 
     }
 
