@@ -8,15 +8,19 @@ import com.fy.chatserver.common.SyncCircleSet;
 import com.fy.chatserver.communicate.config.*;
 import com.fy.chatserver.communicate.proto.ClientProto;
 import com.fy.chatserver.communicate.proto.ServerProto;
+import com.fy.chatserver.communicate.utils.LoaderUtil;
 import com.fy.chatserver.communicate.utils.ProtocolUtil;
+import com.fy.chatserver.discovery.GroupFinder;
 import com.fy.chatserver.discovery.ServiceFinder;
-import com.fy.chatserver.discovery.ServiceFinderProvider;
+import com.fy.chatserver.discovery.ServiceProvider;
+import com.google.protobuf.MessageLite;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,16 +28,19 @@ import javax.annotation.Nonnull;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 /**
  * @author zhufeifei 2023/9/9
  **/
 
-public class MsgManager implements Closeable {
+public class MsgManager implements Closeable, Constants {
 
     public MsgManager(Properties properties) {
         this.remotePeerMap = new ConcurrentHashMap<>();
@@ -51,12 +58,24 @@ public class MsgManager implements Closeable {
 
         this.userChannelMsgHandler = new UserChannelMsgHandler();
 
-        this.unifiedHeartbeatHandler = new UnifiedHeartbeatHandler();
+        this.userUnifiedHeartbeatHandler = new UnifiedHeartbeatHandler(ProtobufProvider.forUser());
+        this.remoteUnifiedHeartbeatHandler = new UnifiedHeartbeatHandler(ProtobufProvider.forServer());
 
-        AcceptorConfig userAcceptorConfig = new UserAcceptorConfig(UserChannelNotificationHandler::new, ()->this.userChannelMsgHandler, ()->this.unifiedHeartbeatHandler);
+        this.userChannelGroupOpHandler = new UserChannelGroupOpHandler();
+
+        AcceptorConfig userAcceptorConfig = new UserAcceptorConfig(
+                UserChannelNotificationHandler::new,
+                ()->this.userChannelMsgHandler,
+                ()->this.userUnifiedHeartbeatHandler,
+                ()->this.userChannelGroupOpHandler);
+
         userAcceptorConfig.load(properties);
 
-        this.remoteChannelConfig = new RemoteChannelConfig(this.remoteChannelMsgHandler, new RemoteChannelNotificationHandler(), this.unifiedHeartbeatHandler);
+        this.remoteChannelConfig = new RemoteChannelConfig(
+                ()->this.remoteChannelMsgHandler,
+                RemoteChannelNotificationHandler::new,
+                ()->this.remoteUnifiedHeartbeatHandler);
+
         this.remoteChannelConfig.load(properties);
 
         AcceptorConfig remoteAcceptorConfig = new RemoteAcceptorConfig(()->this.remoteChannelMsgHandler, RemoteChannelNotificationHandler::new);
@@ -68,19 +87,15 @@ public class MsgManager implements Closeable {
         this.userAccepter = new Accepter(userAcceptorConfig, ChannelInitializerProvider.forUser(userAcceptorConfig));
         this.remoteAccepter = new Accepter(remoteAcceptorConfig, ChannelInitializerProvider.forRemoteServer(remoteAcceptorConfig));
 
-        String serviceFindProviderClass = properties.getProperty("chat-server.service-finder.provider", "com.fy.chatserver.discovery.ZKServiceFinderProvider");
-        try {
-            Class<?> aClass = Class.forName(serviceFindProviderClass);
-            ServiceFinderProvider provider = (ServiceFinderProvider) aClass.newInstance();
-            this.serviceFinder = provider.newInstance(properties);
-            this.serviceFinder.registerServer(this.curServiceId, properties.getProperty("chat-server.ip"));
-        } catch (ClassNotFoundException e) {
-            LOG.error("{} configuration is error, {} class not found.", "chat-server.service-finder.provider", serviceFindProviderClass);
-            throw new RuntimeException(e);
-        } catch (InstantiationException | IllegalAccessException e) {
-            LOG.error("{} class must have empty constructor.", serviceFindProviderClass);
-            throw new RuntimeException(e);
-        }
+        String serviceFindProviderClass = properties.getProperty("chat-server.service-finder.provider", "com.fy.chatserver.discovery.ZkServiceFinderProvider");
+        ServiceProvider provider = (ServiceProvider) LoaderUtil.load(serviceFindProviderClass, "chat-server.service-finder.provider");
+        this.serviceFinder = (ServiceFinder) provider.newInstance(properties);
+        this.serviceFinder.registerServer(this.curServiceId, properties.getProperty("chat-server.ip"));
+
+        String groupFinderProviderClass = properties.getProperty("chat-server.group-finder.provider", "com.fy.chatserver.discovery.ZkGroupFinderProvider");
+        provider = (ServiceProvider) LoaderUtil.load(groupFinderProviderClass, "chat-server.group-finder.provider");
+        this.groupFinder = (GroupFinder) provider.newInstance(properties);
+
     }
 
     private final static Logger LOG = LoggerFactory.getLogger(MsgManager.class);
@@ -103,6 +118,8 @@ public class MsgManager implements Closeable {
 
     private final ServiceFinder serviceFinder;
 
+    private final GroupFinder groupFinder;
+
     private final Accepter userAccepter;
 
     private final RemoteChannelConfig remoteChannelConfig;
@@ -115,7 +132,14 @@ public class MsgManager implements Closeable {
     private final RemoteChannelMsgHandler remoteChannelMsgHandler;
 
     // shared
-    private final UnifiedHeartbeatHandler unifiedHeartbeatHandler;
+    private final UnifiedHeartbeatHandler userUnifiedHeartbeatHandler;
+
+    // shared
+    private final UnifiedHeartbeatHandler remoteUnifiedHeartbeatHandler;
+
+    // shared
+    private final UserChannelGroupOpHandler userChannelGroupOpHandler;
+
 
 
     public void start() throws InterruptedException {
@@ -316,24 +340,48 @@ public class MsgManager implements Closeable {
                 LOG.info("{} have not the msg object.", protocol);
                 return;
             }
-            String toId = protocol.getMsg().getTo();
-            if (MsgManager.this.userStateSupervisor.isLocal(toId)) {
-                MsgManager.this.nextIn(protocol);
+            ClientProto.Msg msg = protocol.getMsg();
+            String toId = msg.getTo();
+            if (self.userStateSupervisor.isLocal(toId)) {
+                self.nextIn(protocol);
                 return;
             }
-            String serviceId = serviceFinder.findService(toId);
-            RemotePeer remotePeer = MsgManager.this.remotePeerMap.get(serviceId);
-            if (remotePeer != null || (remotePeer = MsgManager.this.createAndStartRemotePeer(serviceId)) != null) {
-                remotePeer.write(protocol).addListener(future -> {
-                    if (future.isSuccess()) {
-                        LOG.info("send success. {}", protocol);
-                    } else {
-                        LOG.info("send fail. {}", future.cause().getMessage());
-                        self.nextOut(protocol);
+
+            if (msg.hasIsGroup()) {
+                /* group message -> user message
+                 * group message: isGroup exist.
+                 * user message: gid exist.
+                 * It means that only one of isGroup and gid exist.
+                 */
+                List<String> groutUsers = self.groupFinder.list(msg.getFrom(), msg.getTo());
+                final String from = msg.getFrom();
+                groutUsers.forEach(cid->{
+                    // ignore self.
+                    if (cid.equals(from)) {
+                        return;
                     }
+                    ClientProto.CInner.Builder builder = ClientProto.CInner.newBuilder(protocol);
+                    builder.getMsgBuilder().clearIsGroup().setGid(toId).setTo(cid);
+                    self.nextOut(builder.build());
                 });
                 return;
+            } else {
+                String serviceId = serviceFinder.findService(toId);
+                RemotePeer remotePeer = null;
+                if (serviceId != null &&
+                        ((remotePeer = self.remotePeerMap.get(serviceId)) != null || (remotePeer = self.createAndStartRemotePeer(serviceId)) != null)) {
+                    remotePeer.write(protocol).addListener(future -> {
+                        if (future.isSuccess()) {
+                            LOG.info("send success. {}", protocol);
+                        } else {
+                            LOG.info("send fail. {}", future.cause().getMessage());
+                            self.nextOut(protocol);
+                        }
+                    });
+                    return;
+                }
             }
+            // the message haven't consumer, it means that the target user offline.
             // TODO: record the message for the future
             LOG.info("{} discard.", protocol);
         }
@@ -348,6 +396,10 @@ public class MsgManager implements Closeable {
     @ChannelHandler.Sharable
     static
     class UnifiedHeartbeatHandler extends ChannelInboundHandlerAdapter implements NamedChannelHandler {
+        private final MessageLite type;
+        public UnifiedHeartbeatHandler(MessageLite type) {
+            this.type = type;
+        }
         @Override
         public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
             if (evt instanceof IdleStateEvent) {
@@ -357,7 +409,7 @@ public class MsgManager implements Closeable {
                     Towards the remote channel, the WRITE_IDLE event should be handled by all remote peer.
                     That maybe set different value of writeIdleTime to accomplish it.
                     */
-                    ctx.writeAndFlush(ProtocolUtil.newHeartbeat());
+                    ctx.writeAndFlush(ProtocolUtil.newHeartbeat(this.type));
                 } else if (IdleState.READER_IDLE.equals(((IdleStateEvent) evt).state())) {
                     LOG.info("The channel unread too many time. We will close it.");
                     ctx.close();
@@ -418,7 +470,7 @@ public class MsgManager implements Closeable {
         private void handleNotification(ChannelHandlerContext ctx, ServerProto.SInner sInner) {
             int code = sInner.getNotification().getCode();
             String data = sInner.getNotification().getMsg();
-            if (Constants.REPLY_PEER_REGISTER == code) {
+            if (NotificationCode.REPLY_PEER_REGISTER == code) {
                 if (this.serviceId == null) {
                     /* unregistered */
                     this.serviceId = data;
@@ -492,7 +544,7 @@ public class MsgManager implements Closeable {
 
         private void handlerNotification(ChannelHandlerContext ctx, ClientProto.CInner inner) {
             ClientProto.Notification notification = inner.getNotification();
-            if (notification.getCode() == Constants.REPLY_PEER_REGISTER && !this.isRegister) {
+            if (notification.getCode() == NotificationCode.REPLY_PEER_REGISTER && !this.isRegister) {
                 // register the channel
                 this.clientId = notification.getMsg();;
                 self.userStateSupervisor.login(this.clientId, ctx.channel());
@@ -503,7 +555,7 @@ public class MsgManager implements Closeable {
         private void sendRegisterNotification(ChannelHandlerContext ctx) {
             ClientProto.CInner.Builder builder = ClientProto.CInner.newBuilder();
             builder.setType(ClientProto.DataType.NOTIFICATION)
-                    .setNotification(ClientProto.Notification.newBuilder().setCode(Constants.NOTE_PEER_REGISTER).build());
+                    .setNotification(ClientProto.Notification.newBuilder().setCode(NotificationCode.NOTE_PEER_REGISTER).build());
             ctx.writeAndFlush(builder.build());
         }
 
@@ -545,6 +597,71 @@ public class MsgManager implements Closeable {
         @Override
         public String name() {
             return "user-channel-msg-handler-shared";
+        }
+    }
+
+    @ChannelHandler.Sharable
+    class UserChannelGroupOpHandler extends ChannelInboundHandlerAdapter implements NamedChannelHandler {
+        private final MsgManager self = MsgManager.this;
+        @Override
+        public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+            ClientProto.CInner inner = (ClientProto.CInner) msg;
+            if (inner.getType() == ClientProto.DataType.GROUP_OP) {
+                this.processGroupOp(ctx, inner);
+            } else {
+                super.channelRead(ctx, msg);
+            }
+        }
+
+        private void processGroupOp(ChannelHandlerContext ctx, ClientProto.CInner inner) {
+            ClientProto.GroupOp groupOp = inner.getGroupOp();
+            switch (groupOp.getOpCode()) {
+                case GroupOpCode.CREATE: {
+                    LOG.debug("create a group. {}", inner);
+
+                    ClientProto.GroupCreateData createData = groupOp.getCreteData();
+                    String gid = self.groupFinder.create(createData.getUid(), createData.getIsPublish());
+                    if (gid == null) {
+                        gid = "";
+                    }
+                    // write the notification
+                    ctx.writeAndFlush(ProtocolUtil.newUserNotification(inner.getAck(), GroupOpCode.CREATE, gid));
+                }break;
+                case GroupOpCode.JOIN: {
+                    LOG.debug("join a group. {}", inner);
+
+                    ClientProto.GroupUpdateData updateData = groupOp.getUpdateData();
+                    self.groupFinder.join(updateData.getUid(), updateData.getGid());
+                }break;
+                case GroupOpCode.INVITE: {
+                    LOG.debug("invite a group. {}", inner);
+
+                    ClientProto.GroupInviteData inviteData = groupOp.getInviteData();
+                    self.groupFinder.invite(inviteData.getUid(), inviteData.getToId(), inviteData.getGid());
+                }break;
+                case GroupOpCode.DISSOLVE: {
+                    LOG.debug("dissolve a group. {}", inner);
+
+                    ClientProto.GroupUpdateData updateData = groupOp.getUpdateData();
+                    boolean dissolve = self.groupFinder.dissolve(updateData.getUid(), updateData.getGid());
+                    String msg = dissolve ? "success" : "fail";
+                    ctx.writeAndFlush(ProtocolUtil.newUserNotification(inner.getAck(), GroupOpCode.DISSOLVE, msg));
+                }break;
+                case GroupOpCode.QUIT: {
+                    LOG.debug("quit a group. {}", inner);
+
+                    ClientProto.GroupUpdateData updateData = groupOp.getUpdateData();
+                    boolean quit = self.groupFinder.quit(updateData.getUid(), updateData.getGid());
+                    String msg = quit ? "success" : "fail";
+                    ctx.writeAndFlush(ProtocolUtil.newUserNotification(inner.getAck(), GroupOpCode.DISSOLVE, msg));
+                }break;
+            }
+
+        }
+
+        @Override
+        public String name() {
+            return "user-channel-group-op-handler";
         }
     }
 }

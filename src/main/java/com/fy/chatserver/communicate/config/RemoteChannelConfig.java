@@ -9,18 +9,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.function.Supplier;
 
 /**
- * configuration for remote channel's
+ * configuration for current hostname actively start connect the remote hostname
  * @author zolmk
  */
 public class RemoteChannelConfig {
     protected int workerCount;
     protected int readIdleTime;
     protected int writeIdleTime;
-    protected final List<NamedChannelHandler> handlers;
+    protected final List<Supplier<NamedChannelHandler>> handlers;
 
-    public RemoteChannelConfig(NamedChannelHandler... channelHandlers) {
+    @SafeVarargs
+    public RemoteChannelConfig(Supplier<NamedChannelHandler>... channelHandlers) {
         this.workerCount = 2;
         this.readIdleTime = 0;
         this.writeIdleTime = 0;
@@ -62,7 +64,7 @@ public class RemoteChannelConfig {
         return ProtobufProvider.forServer();
     }
 
-    public List<NamedChannelHandler> getHandlers() {
+    public List<Supplier<NamedChannelHandler>> getHandlers() {
         return handlers;
     }
 }

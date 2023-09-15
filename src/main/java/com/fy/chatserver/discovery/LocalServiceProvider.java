@@ -6,7 +6,7 @@ import java.util.Properties;
  * @author zhufeifei 2023/9/12
  **/
 
-public class LocalServiceFinderProvider implements ServiceFinderProvider {
+public class LocalServiceProvider implements ServiceProvider {
     @Override
     public ServiceFinder newInstance(Properties properties) {
         LocalServiceFinderConfig config = new LocalServiceFinderConfig();

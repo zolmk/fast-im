@@ -18,7 +18,7 @@
             <totalSizeCap>10GB</totalSizeCap>
         </rollingPolicy>
     </appender>
-    <logger name="com.sports" level="DEBUG" additivity="false">
+    <logger name="com.fy" level="DEBUG" additivity="false">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="LOG_FILE"/>
         <!--<appender-ref ref="myAppender"/>-->

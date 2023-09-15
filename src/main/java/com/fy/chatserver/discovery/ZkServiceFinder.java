@@ -18,15 +18,15 @@ import java.util.Optional;
  * @author zhufeifei 2023/9/9
  **/
 
-public class ZKServiceFinder implements ServiceFinder{
-    private static final Logger LOG = LoggerFactory.getLogger(ZKServiceFinder.class);
+public class ZkServiceFinder implements ServiceFinder{
+    private static final Logger LOG = LoggerFactory.getLogger(ZkServiceFinder.class);
     private final CuratorCache clientCache;
     private final CuratorCache serviceCache;
     private final CuratorFramework client;
     private final String monitorClientPath;
     private final String monitorServicePath;
 
-    public ZKServiceFinder(String rootPath, String connectString) {
+    public ZkServiceFinder(String rootPath, String connectString) {
         this.monitorClientPath =  rootPath + "/client";
         this.monitorServicePath = rootPath + "/server";
         this.client = CuratorFrameworkFactory.newClient(connectString, 5000, 10000, new RetryNTimes(10, 2000));
