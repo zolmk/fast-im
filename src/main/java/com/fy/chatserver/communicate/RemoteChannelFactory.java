@@ -58,7 +58,10 @@ public class RemoteChannelFactory {
                     .addLast(new ProtobufDecoder(this.config.getMessageLite()));
             ChannelPipeline pipeline = ch.pipeline();
             this.config.getHandlers()
-                    .forEach(namedChannelHandler -> pipeline.addLast(namedChannelHandler.name(), namedChannelHandler));
+                    .forEach(supplier -> {
+                        NamedChannelHandler handler = supplier.get();
+                        pipeline.addLast(handler.name(), handler);
+                    });
         }
     }
 }

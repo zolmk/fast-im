@@ -1,5 +1,6 @@
 package com.fy.chatserver;
 
+import com.fy.chatserver.communicate.Constants;
 import com.fy.chatserver.communicate.proto.ClientProto;
 import com.google.protobuf.ByteString;
 import io.netty.bootstrap.Bootstrap;
@@ -33,12 +34,16 @@ public class TestClient {
         String selfId = args[2];
         start(port);
         register(selfId);
+        Thread.sleep(100);
+        channel.writeAndFlush(groupNotification());
         if (connected.get()) {
             String row = null;
             Scanner scanner = new Scanner(System.in);
             while (scanner.hasNextLine()) {
                 row = scanner.nextLine();
-                channel.writeAndFlush(buildMsg(row, toId, selfId));
+                ClientProto.CInner inner = buildMsg(row, toId, selfId);
+                System.out.println(inner);
+                channel.writeAndFlush(inner);
             }
         }
         LOG.info("finish.");
@@ -48,7 +53,13 @@ public class TestClient {
     public static ClientProto.CInner buildMsg(String msg, String to, String from) {
         return ClientProto.CInner.newBuilder().setType(ClientProto.DataType.MSG).setMsg(
                 ClientProto.Msg.newBuilder().setType(ClientProto.MsgType.TEXT).setData(ByteString.copyFrom(msg.getBytes(StandardCharsets.UTF_8)))
-                        .setTo(to).setFrom(from).build()).build();
+                        .setTo("435").setFrom(from).setIsGroup(true).build()).build();
+    }
+
+    public static ClientProto.CInner groupNotification() {
+        ClientProto.CInner.Builder builder = ClientProto.CInner.newBuilder();
+        builder.setAck(10000).setType(ClientProto.DataType.GROUP_OP).setGroupOp(ClientProto.GroupOp.newBuilder().setOpCode(Constants.GroupOpCode.CREATE).setCreteData(ClientProto.GroupCreateData.newBuilder().setIsPublish(true).setUid("fy")).build());
+        return builder.build();
     }
 
     public static void start(int port) throws InterruptedException {

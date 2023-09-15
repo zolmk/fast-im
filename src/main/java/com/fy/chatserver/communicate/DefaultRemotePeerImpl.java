@@ -82,7 +82,7 @@ public class DefaultRemotePeerImpl implements RemotePeer {
                     continue;
                 }
                 hashcode = protocol.hashCode();
-                MessageLite serverProtocol = ProtocolUtil.c2s((ClientProto.CInner) protocol, this.serviceId, 0L);
+                MessageLite serverProtocol = ProtocolUtil.c2s((ClientProto.CInner) protocol, this.serviceId);
                 if (remoteChannel.isWritable()) {
                     int finalHashcode = hashcode;
                     this.remoteChannel.writeAndFlush(serverProtocol).addListener(future -> {

@@ -15,7 +15,7 @@ public class LocalServiceFinder implements ServiceFinder {
     }
     @Override
     public String findService(String clientId) {
-        return this.config.getPeerId();
+        return null;
     }
 
     @Override

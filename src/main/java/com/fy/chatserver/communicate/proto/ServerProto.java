@@ -27,54 +27,60 @@ public final class ServerProto {
      * <code>.DataType type = 1;</code>
      * @return The type.
      */
-    ClientProto.DataType getType();
+    com.fy.chatserver.communicate.proto.ClientProto.DataType getType();
 
     /**
-     * <code>.ServerMsg msg = 2;</code>
+     * <code>int64 ack = 2;</code>
+     * @return The ack.
+     */
+    long getAck();
+
+    /**
+     * <code>.ServerMsg msg = 3;</code>
      * @return Whether the msg field is set.
      */
     boolean hasMsg();
     /**
-     * <code>.ServerMsg msg = 2;</code>
+     * <code>.ServerMsg msg = 3;</code>
      * @return The msg.
      */
-    ServerProto.ServerMsg getMsg();
+    com.fy.chatserver.communicate.proto.ServerProto.ServerMsg getMsg();
     /**
-     * <code>.ServerMsg msg = 2;</code>
+     * <code>.ServerMsg msg = 3;</code>
      */
-    ServerProto.ServerMsgOrBuilder getMsgOrBuilder();
+    com.fy.chatserver.communicate.proto.ServerProto.ServerMsgOrBuilder getMsgOrBuilder();
 
     /**
-     * <code>.Notification notification = 3;</code>
+     * <code>.Notification notification = 4;</code>
      * @return Whether the notification field is set.
      */
     boolean hasNotification();
     /**
-     * <code>.Notification notification = 3;</code>
+     * <code>.Notification notification = 4;</code>
      * @return The notification.
      */
-    ClientProto.Notification getNotification();
+    com.fy.chatserver.communicate.proto.ClientProto.Notification getNotification();
     /**
-     * <code>.Notification notification = 3;</code>
+     * <code>.Notification notification = 4;</code>
      */
-    ClientProto.NotificationOrBuilder getNotificationOrBuilder();
+    com.fy.chatserver.communicate.proto.ClientProto.NotificationOrBuilder getNotificationOrBuilder();
 
     /**
-     * <code>.Heartbeat heartbeat = 4;</code>
+     * <code>.Heartbeat heartbeat = 5;</code>
      * @return Whether the heartbeat field is set.
      */
     boolean hasHeartbeat();
     /**
-     * <code>.Heartbeat heartbeat = 4;</code>
+     * <code>.Heartbeat heartbeat = 5;</code>
      * @return The heartbeat.
      */
-    ClientProto.Heartbeat getHeartbeat();
+    com.fy.chatserver.communicate.proto.ClientProto.Heartbeat getHeartbeat();
     /**
-     * <code>.Heartbeat heartbeat = 4;</code>
+     * <code>.Heartbeat heartbeat = 5;</code>
      */
-    ClientProto.HeartbeatOrBuilder getHeartbeatOrBuilder();
+    com.fy.chatserver.communicate.proto.ClientProto.HeartbeatOrBuilder getHeartbeatOrBuilder();
 
-    ServerProto.SInner.DataCase getDataCase();
+    public com.fy.chatserver.communicate.proto.ServerProto.SInner.DataCase getDataCase();
   }
   /**
    * Protobuf type {@code SInner}
@@ -99,28 +105,122 @@ public final class ServerProto {
       return new SInner();
     }
 
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private SInner(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 8: {
+              int rawValue = input.readEnum();
+
+              type_ = rawValue;
+              break;
+            }
+            case 16: {
+
+              ack_ = input.readInt64();
+              break;
+            }
+            case 26: {
+              com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.Builder subBuilder = null;
+              if (dataCase_ == 3) {
+                subBuilder = ((com.fy.chatserver.communicate.proto.ServerProto.ServerMsg) data_).toBuilder();
+              }
+              data_ =
+                  input.readMessage(com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.fy.chatserver.communicate.proto.ServerProto.ServerMsg) data_);
+                data_ = subBuilder.buildPartial();
+              }
+              dataCase_ = 3;
+              break;
+            }
+            case 34: {
+              com.fy.chatserver.communicate.proto.ClientProto.Notification.Builder subBuilder = null;
+              if (dataCase_ == 4) {
+                subBuilder = ((com.fy.chatserver.communicate.proto.ClientProto.Notification) data_).toBuilder();
+              }
+              data_ =
+                  input.readMessage(com.fy.chatserver.communicate.proto.ClientProto.Notification.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.fy.chatserver.communicate.proto.ClientProto.Notification) data_);
+                data_ = subBuilder.buildPartial();
+              }
+              dataCase_ = 4;
+              break;
+            }
+            case 42: {
+              com.fy.chatserver.communicate.proto.ClientProto.Heartbeat.Builder subBuilder = null;
+              if (dataCase_ == 5) {
+                subBuilder = ((com.fy.chatserver.communicate.proto.ClientProto.Heartbeat) data_).toBuilder();
+              }
+              data_ =
+                  input.readMessage(com.fy.chatserver.communicate.proto.ClientProto.Heartbeat.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.fy.chatserver.communicate.proto.ClientProto.Heartbeat) data_);
+                data_ = subBuilder.buildPartial();
+              }
+              dataCase_ = 5;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return ServerProto.internal_static_SInner_descriptor;
+      return com.fy.chatserver.communicate.proto.ServerProto.internal_static_SInner_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ServerProto.internal_static_SInner_fieldAccessorTable
+      return com.fy.chatserver.communicate.proto.ServerProto.internal_static_SInner_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              ServerProto.SInner.class, ServerProto.SInner.Builder.class);
+              com.fy.chatserver.communicate.proto.ServerProto.SInner.class, com.fy.chatserver.communicate.proto.ServerProto.SInner.Builder.class);
     }
 
     private int dataCase_ = 0;
-    @SuppressWarnings("serial")
     private java.lang.Object data_;
     public enum DataCase
         implements com.google.protobuf.Internal.EnumLite,
             com.google.protobuf.AbstractMessage.InternalOneOfEnum {
-      MSG(2),
-      NOTIFICATION(3),
-      HEARTBEAT(4),
+      MSG(3),
+      NOTIFICATION(4),
+      HEARTBEAT(5),
       DATA_NOT_SET(0);
       private final int value;
       private DataCase(int value) {
@@ -138,9 +238,9 @@ public final class ServerProto {
 
       public static DataCase forNumber(int value) {
         switch (value) {
-          case 2: return MSG;
-          case 3: return NOTIFICATION;
-          case 4: return HEARTBEAT;
+          case 3: return MSG;
+          case 4: return NOTIFICATION;
+          case 5: return HEARTBEAT;
           case 0: return DATA_NOT_SET;
           default: return null;
         }
@@ -157,7 +257,7 @@ public final class ServerProto {
     }
 
     public static final int TYPE_FIELD_NUMBER = 1;
-    private int type_ = 0;
+    private int type_;
     /**
      * <code>.DataType type = 1;</code>
      * @return The enum numeric value on the wire for type.
@@ -169,102 +269,114 @@ public final class ServerProto {
      * <code>.DataType type = 1;</code>
      * @return The type.
      */
-    @java.lang.Override public ClientProto.DataType getType() {
-      ClientProto.DataType result = ClientProto.DataType.forNumber(type_);
-      return result == null ? ClientProto.DataType.UNRECOGNIZED : result;
+    @java.lang.Override public com.fy.chatserver.communicate.proto.ClientProto.DataType getType() {
+      @SuppressWarnings("deprecation")
+      com.fy.chatserver.communicate.proto.ClientProto.DataType result = com.fy.chatserver.communicate.proto.ClientProto.DataType.valueOf(type_);
+      return result == null ? com.fy.chatserver.communicate.proto.ClientProto.DataType.UNRECOGNIZED : result;
     }
 
-    public static final int MSG_FIELD_NUMBER = 2;
+    public static final int ACK_FIELD_NUMBER = 2;
+    private long ack_;
     /**
-     * <code>.ServerMsg msg = 2;</code>
+     * <code>int64 ack = 2;</code>
+     * @return The ack.
+     */
+    @java.lang.Override
+    public long getAck() {
+      return ack_;
+    }
+
+    public static final int MSG_FIELD_NUMBER = 3;
+    /**
+     * <code>.ServerMsg msg = 3;</code>
      * @return Whether the msg field is set.
      */
     @java.lang.Override
     public boolean hasMsg() {
-      return dataCase_ == 2;
+      return dataCase_ == 3;
     }
     /**
-     * <code>.ServerMsg msg = 2;</code>
+     * <code>.ServerMsg msg = 3;</code>
      * @return The msg.
      */
     @java.lang.Override
-    public ServerProto.ServerMsg getMsg() {
-      if (dataCase_ == 2) {
-         return (ServerProto.ServerMsg) data_;
+    public com.fy.chatserver.communicate.proto.ServerProto.ServerMsg getMsg() {
+      if (dataCase_ == 3) {
+         return (com.fy.chatserver.communicate.proto.ServerProto.ServerMsg) data_;
       }
-      return ServerProto.ServerMsg.getDefaultInstance();
+      return com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.getDefaultInstance();
     }
     /**
-     * <code>.ServerMsg msg = 2;</code>
+     * <code>.ServerMsg msg = 3;</code>
      */
     @java.lang.Override
-    public ServerProto.ServerMsgOrBuilder getMsgOrBuilder() {
-      if (dataCase_ == 2) {
-         return (ServerProto.ServerMsg) data_;
+    public com.fy.chatserver.communicate.proto.ServerProto.ServerMsgOrBuilder getMsgOrBuilder() {
+      if (dataCase_ == 3) {
+         return (com.fy.chatserver.communicate.proto.ServerProto.ServerMsg) data_;
       }
-      return ServerProto.ServerMsg.getDefaultInstance();
+      return com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.getDefaultInstance();
     }
 
-    public static final int NOTIFICATION_FIELD_NUMBER = 3;
+    public static final int NOTIFICATION_FIELD_NUMBER = 4;
     /**
-     * <code>.Notification notification = 3;</code>
+     * <code>.Notification notification = 4;</code>
      * @return Whether the notification field is set.
      */
     @java.lang.Override
     public boolean hasNotification() {
-      return dataCase_ == 3;
+      return dataCase_ == 4;
     }
     /**
-     * <code>.Notification notification = 3;</code>
+     * <code>.Notification notification = 4;</code>
      * @return The notification.
      */
     @java.lang.Override
-    public ClientProto.Notification getNotification() {
-      if (dataCase_ == 3) {
-         return (ClientProto.Notification) data_;
+    public com.fy.chatserver.communicate.proto.ClientProto.Notification getNotification() {
+      if (dataCase_ == 4) {
+         return (com.fy.chatserver.communicate.proto.ClientProto.Notification) data_;
       }
-      return ClientProto.Notification.getDefaultInstance();
+      return com.fy.chatserver.communicate.proto.ClientProto.Notification.getDefaultInstance();
     }
     /**
-     * <code>.Notification notification = 3;</code>
+     * <code>.Notification notification = 4;</code>
      */
     @java.lang.Override
-    public ClientProto.NotificationOrBuilder getNotificationOrBuilder() {
-      if (dataCase_ == 3) {
-         return (ClientProto.Notification) data_;
+    public com.fy.chatserver.communicate.proto.ClientProto.NotificationOrBuilder getNotificationOrBuilder() {
+      if (dataCase_ == 4) {
+         return (com.fy.chatserver.communicate.proto.ClientProto.Notification) data_;
       }
-      return ClientProto.Notification.getDefaultInstance();
+      return com.fy.chatserver.communicate.proto.ClientProto.Notification.getDefaultInstance();
     }
 
-    public static final int HEARTBEAT_FIELD_NUMBER = 4;
+    public static final int HEARTBEAT_FIELD_NUMBER = 5;
     /**
-     * <code>.Heartbeat heartbeat = 4;</code>
+     * <code>.Heartbeat heartbeat = 5;</code>
      * @return Whether the heartbeat field is set.
      */
     @java.lang.Override
     public boolean hasHeartbeat() {
-      return dataCase_ == 4;
+      return dataCase_ == 5;
     }
     /**
-     * <code>.Heartbeat heartbeat = 4;</code>
+     * <code>.Heartbeat heartbeat = 5;</code>
      * @return The heartbeat.
      */
     @java.lang.Override
-    public ClientProto.Heartbeat getHeartbeat() {
-      if (dataCase_ == 4) {
-         return (ClientProto.Heartbeat) data_;
+    public com.fy.chatserver.communicate.proto.ClientProto.Heartbeat getHeartbeat() {
+      if (dataCase_ == 5) {
+         return (com.fy.chatserver.communicate.proto.ClientProto.Heartbeat) data_;
       }
-      return ClientProto.Heartbeat.getDefaultInstance();
+      return com.fy.chatserver.communicate.proto.ClientProto.Heartbeat.getDefaultInstance();
     }
     /**
-     * <code>.Heartbeat heartbeat = 4;</code>
+     * <code>.Heartbeat heartbeat = 5;</code>
      */
     @java.lang.Override
-    public ClientProto.HeartbeatOrBuilder getHeartbeatOrBuilder() {
-      if (dataCase_ == 4) {
-         return (ClientProto.Heartbeat) data_;
+    public com.fy.chatserver.communicate.proto.ClientProto.HeartbeatOrBuilder getHeartbeatOrBuilder() {
+      if (dataCase_ == 5) {
+         return (com.fy.chatserver.communicate.proto.ClientProto.Heartbeat) data_;
       }
-      return ClientProto.Heartbeat.getDefaultInstance();
+      return com.fy.chatserver.communicate.proto.ClientProto.Heartbeat.getDefaultInstance();
     }
 
     private byte memoizedIsInitialized = -1;
@@ -281,19 +393,22 @@ public final class ServerProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (type_ != ClientProto.DataType.HEARTBEAT.getNumber()) {
+      if (type_ != com.fy.chatserver.communicate.proto.ClientProto.DataType.HEARTBEAT.getNumber()) {
         output.writeEnum(1, type_);
       }
-      if (dataCase_ == 2) {
-        output.writeMessage(2, (ServerProto.ServerMsg) data_);
+      if (ack_ != 0L) {
+        output.writeInt64(2, ack_);
       }
       if (dataCase_ == 3) {
-        output.writeMessage(3, (ClientProto.Notification) data_);
+        output.writeMessage(3, (com.fy.chatserver.communicate.proto.ServerProto.ServerMsg) data_);
       }
       if (dataCase_ == 4) {
-        output.writeMessage(4, (ClientProto.Heartbeat) data_);
+        output.writeMessage(4, (com.fy.chatserver.communicate.proto.ClientProto.Notification) data_);
       }
-      getUnknownFields().writeTo(output);
+      if (dataCase_ == 5) {
+        output.writeMessage(5, (com.fy.chatserver.communicate.proto.ClientProto.Heartbeat) data_);
+      }
+      unknownFields.writeTo(output);
     }
 
     @java.lang.Override
@@ -302,23 +417,27 @@ public final class ServerProto {
       if (size != -1) return size;
 
       size = 0;
-      if (type_ != ClientProto.DataType.HEARTBEAT.getNumber()) {
+      if (type_ != com.fy.chatserver.communicate.proto.ClientProto.DataType.HEARTBEAT.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, type_);
       }
-      if (dataCase_ == 2) {
+      if (ack_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, (ServerProto.ServerMsg) data_);
+          .computeInt64Size(2, ack_);
       }
       if (dataCase_ == 3) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, (ClientProto.Notification) data_);
+          .computeMessageSize(3, (com.fy.chatserver.communicate.proto.ServerProto.ServerMsg) data_);
       }
       if (dataCase_ == 4) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, (ClientProto.Heartbeat) data_);
+          .computeMessageSize(4, (com.fy.chatserver.communicate.proto.ClientProto.Notification) data_);
       }
-      size += getUnknownFields().getSerializedSize();
+      if (dataCase_ == 5) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, (com.fy.chatserver.communicate.proto.ClientProto.Heartbeat) data_);
+      }
+      size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -328,30 +447,32 @@ public final class ServerProto {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof ServerProto.SInner)) {
+      if (!(obj instanceof com.fy.chatserver.communicate.proto.ServerProto.SInner)) {
         return super.equals(obj);
       }
-      ServerProto.SInner other = (ServerProto.SInner) obj;
+      com.fy.chatserver.communicate.proto.ServerProto.SInner other = (com.fy.chatserver.communicate.proto.ServerProto.SInner) obj;
 
       if (type_ != other.type_) return false;
+      if (getAck()
+          != other.getAck()) return false;
       if (!getDataCase().equals(other.getDataCase())) return false;
       switch (dataCase_) {
-        case 2:
+        case 3:
           if (!getMsg()
               .equals(other.getMsg())) return false;
           break;
-        case 3:
+        case 4:
           if (!getNotification()
               .equals(other.getNotification())) return false;
           break;
-        case 4:
+        case 5:
           if (!getHeartbeat()
               .equals(other.getHeartbeat())) return false;
           break;
         case 0:
         default:
       }
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
 
@@ -364,92 +485,93 @@ public final class ServerProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + TYPE_FIELD_NUMBER;
       hash = (53 * hash) + type_;
+      hash = (37 * hash) + ACK_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getAck());
       switch (dataCase_) {
-        case 2:
+        case 3:
           hash = (37 * hash) + MSG_FIELD_NUMBER;
           hash = (53 * hash) + getMsg().hashCode();
           break;
-        case 3:
+        case 4:
           hash = (37 * hash) + NOTIFICATION_FIELD_NUMBER;
           hash = (53 * hash) + getNotification().hashCode();
           break;
-        case 4:
+        case 5:
           hash = (37 * hash) + HEARTBEAT_FIELD_NUMBER;
           hash = (53 * hash) + getHeartbeat().hashCode();
           break;
         case 0:
         default:
       }
-      hash = (29 * hash) + getUnknownFields().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
     }
 
-    public static ServerProto.SInner parseFrom(
+    public static com.fy.chatserver.communicate.proto.ServerProto.SInner parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ServerProto.SInner parseFrom(
+    public static com.fy.chatserver.communicate.proto.ServerProto.SInner parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ServerProto.SInner parseFrom(
+    public static com.fy.chatserver.communicate.proto.ServerProto.SInner parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ServerProto.SInner parseFrom(
+    public static com.fy.chatserver.communicate.proto.ServerProto.SInner parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ServerProto.SInner parseFrom(byte[] data)
+    public static com.fy.chatserver.communicate.proto.ServerProto.SInner parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ServerProto.SInner parseFrom(
+    public static com.fy.chatserver.communicate.proto.ServerProto.SInner parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ServerProto.SInner parseFrom(java.io.InputStream input)
+    public static com.fy.chatserver.communicate.proto.ServerProto.SInner parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ServerProto.SInner parseFrom(
+    public static com.fy.chatserver.communicate.proto.ServerProto.SInner parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-
-    public static ServerProto.SInner parseDelimitedFrom(java.io.InputStream input)
+    public static com.fy.chatserver.communicate.proto.ServerProto.SInner parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-
-    public static ServerProto.SInner parseDelimitedFrom(
+    public static com.fy.chatserver.communicate.proto.ServerProto.SInner parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static ServerProto.SInner parseFrom(
+    public static com.fy.chatserver.communicate.proto.ServerProto.SInner parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ServerProto.SInner parseFrom(
+    public static com.fy.chatserver.communicate.proto.ServerProto.SInner parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -462,7 +584,7 @@ public final class ServerProto {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(ServerProto.SInner prototype) {
+    public static Builder newBuilder(com.fy.chatserver.communicate.proto.ServerProto.SInner prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -483,44 +605,42 @@ public final class ServerProto {
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:SInner)
-        ServerProto.SInnerOrBuilder {
+        com.fy.chatserver.communicate.proto.ServerProto.SInnerOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return ServerProto.internal_static_SInner_descriptor;
+        return com.fy.chatserver.communicate.proto.ServerProto.internal_static_SInner_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ServerProto.internal_static_SInner_fieldAccessorTable
+        return com.fy.chatserver.communicate.proto.ServerProto.internal_static_SInner_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                ServerProto.SInner.class, ServerProto.SInner.Builder.class);
+                com.fy.chatserver.communicate.proto.ServerProto.SInner.class, com.fy.chatserver.communicate.proto.ServerProto.SInner.Builder.class);
       }
 
-      // Construct using com.fy.chatserver.communicate.ServerProto.SInner.newBuilder()
+      // Construct using com.fy.chatserver.communicate.proto.ServerProto.SInner.newBuilder()
       private Builder() {
-
+        maybeForceBuilderInitialization();
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        bitField0_ = 0;
         type_ = 0;
-        if (msgBuilder_ != null) {
-          msgBuilder_.clear();
-        }
-        if (notificationBuilder_ != null) {
-          notificationBuilder_.clear();
-        }
-        if (heartbeatBuilder_ != null) {
-          heartbeatBuilder_.clear();
-        }
+
+        ack_ = 0L;
+
         dataCase_ = 0;
         data_ = null;
         return this;
@@ -529,17 +649,17 @@ public final class ServerProto {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ServerProto.internal_static_SInner_descriptor;
+        return com.fy.chatserver.communicate.proto.ServerProto.internal_static_SInner_descriptor;
       }
 
       @java.lang.Override
-      public ServerProto.SInner getDefaultInstanceForType() {
-        return ServerProto.SInner.getDefaultInstance();
+      public com.fy.chatserver.communicate.proto.ServerProto.SInner getDefaultInstanceForType() {
+        return com.fy.chatserver.communicate.proto.ServerProto.SInner.getDefaultInstance();
       }
 
       @java.lang.Override
-      public ServerProto.SInner build() {
-        ServerProto.SInner result = buildPartial();
+      public com.fy.chatserver.communicate.proto.ServerProto.SInner build() {
+        com.fy.chatserver.communicate.proto.ServerProto.SInner result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -547,36 +667,34 @@ public final class ServerProto {
       }
 
       @java.lang.Override
-      public ServerProto.SInner buildPartial() {
-        ServerProto.SInner result = new ServerProto.SInner(this);
-        if (bitField0_ != 0) { buildPartial0(result); }
-        buildPartialOneofs(result);
+      public com.fy.chatserver.communicate.proto.ServerProto.SInner buildPartial() {
+        com.fy.chatserver.communicate.proto.ServerProto.SInner result = new com.fy.chatserver.communicate.proto.ServerProto.SInner(this);
+        result.type_ = type_;
+        result.ack_ = ack_;
+        if (dataCase_ == 3) {
+          if (msgBuilder_ == null) {
+            result.data_ = data_;
+          } else {
+            result.data_ = msgBuilder_.build();
+          }
+        }
+        if (dataCase_ == 4) {
+          if (notificationBuilder_ == null) {
+            result.data_ = data_;
+          } else {
+            result.data_ = notificationBuilder_.build();
+          }
+        }
+        if (dataCase_ == 5) {
+          if (heartbeatBuilder_ == null) {
+            result.data_ = data_;
+          } else {
+            result.data_ = heartbeatBuilder_.build();
+          }
+        }
+        result.dataCase_ = dataCase_;
         onBuilt();
         return result;
-      }
-
-      private void buildPartial0(ServerProto.SInner result) {
-        int from_bitField0_ = bitField0_;
-        if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.type_ = type_;
-        }
-      }
-
-      private void buildPartialOneofs(ServerProto.SInner result) {
-        result.dataCase_ = dataCase_;
-        result.data_ = this.data_;
-        if (dataCase_ == 2 &&
-            msgBuilder_ != null) {
-          result.data_ = msgBuilder_.build();
-        }
-        if (dataCase_ == 3 &&
-            notificationBuilder_ != null) {
-          result.data_ = notificationBuilder_.build();
-        }
-        if (dataCase_ == 4 &&
-            heartbeatBuilder_ != null) {
-          result.data_ = heartbeatBuilder_.build();
-        }
       }
 
       @java.lang.Override
@@ -613,18 +731,21 @@ public final class ServerProto {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof ServerProto.SInner) {
-          return mergeFrom((ServerProto.SInner)other);
+        if (other instanceof com.fy.chatserver.communicate.proto.ServerProto.SInner) {
+          return mergeFrom((com.fy.chatserver.communicate.proto.ServerProto.SInner)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(ServerProto.SInner other) {
-        if (other == ServerProto.SInner.getDefaultInstance()) return this;
+      public Builder mergeFrom(com.fy.chatserver.communicate.proto.ServerProto.SInner other) {
+        if (other == com.fy.chatserver.communicate.proto.ServerProto.SInner.getDefaultInstance()) return this;
         if (other.type_ != 0) {
           setTypeValue(other.getTypeValue());
+        }
+        if (other.getAck() != 0L) {
+          setAck(other.getAck());
         }
         switch (other.getDataCase()) {
           case MSG: {
@@ -643,7 +764,7 @@ public final class ServerProto {
             break;
           }
         }
-        this.mergeUnknownFields(other.getUnknownFields());
+        this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
       }
@@ -658,56 +779,17 @@ public final class ServerProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
+        com.fy.chatserver.communicate.proto.ServerProto.SInner parsedMessage = null;
         try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 8: {
-                type_ = input.readEnum();
-                bitField0_ |= 0x00000001;
-                break;
-              } // case 8
-              case 18: {
-                input.readMessage(
-                    getMsgFieldBuilder().getBuilder(),
-                    extensionRegistry);
-                dataCase_ = 2;
-                break;
-              } // case 18
-              case 26: {
-                input.readMessage(
-                    getNotificationFieldBuilder().getBuilder(),
-                    extensionRegistry);
-                dataCase_ = 3;
-                break;
-              } // case 26
-              case 34: {
-                input.readMessage(
-                    getHeartbeatFieldBuilder().getBuilder(),
-                    extensionRegistry);
-                dataCase_ = 4;
-                break;
-              } // case 34
-              default: {
-                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
-                  done = true; // was an endgroup tag
-                }
-                break;
-              } // default:
-            } // switch (tag)
-          } // while (!done)
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.fy.chatserver.communicate.proto.ServerProto.SInner) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          onChanged();
-        } // finally
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
         return this;
       }
       private int dataCase_ = 0;
@@ -725,7 +807,6 @@ public final class ServerProto {
         return this;
       }
 
-      private int bitField0_;
 
       private int type_ = 0;
       /**
@@ -741,8 +822,8 @@ public final class ServerProto {
        * @return This builder for chaining.
        */
       public Builder setTypeValue(int value) {
+        
         type_ = value;
-        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -751,20 +832,21 @@ public final class ServerProto {
        * @return The type.
        */
       @java.lang.Override
-      public ClientProto.DataType getType() {
-        ClientProto.DataType result = ClientProto.DataType.forNumber(type_);
-        return result == null ? ClientProto.DataType.UNRECOGNIZED : result;
+      public com.fy.chatserver.communicate.proto.ClientProto.DataType getType() {
+        @SuppressWarnings("deprecation")
+        com.fy.chatserver.communicate.proto.ClientProto.DataType result = com.fy.chatserver.communicate.proto.ClientProto.DataType.valueOf(type_);
+        return result == null ? com.fy.chatserver.communicate.proto.ClientProto.DataType.UNRECOGNIZED : result;
       }
       /**
        * <code>.DataType type = 1;</code>
        * @param value The type to set.
        * @return This builder for chaining.
        */
-      public Builder setType(ClientProto.DataType value) {
+      public Builder setType(com.fy.chatserver.communicate.proto.ClientProto.DataType value) {
         if (value == null) {
           throw new NullPointerException();
         }
-        bitField0_ |= 0x00000001;
+        
         type_ = value.getNumber();
         onChanged();
         return this;
@@ -774,44 +856,75 @@ public final class ServerProto {
        * @return This builder for chaining.
        */
       public Builder clearType() {
-        bitField0_ = (bitField0_ & ~0x00000001);
+        
         type_ = 0;
         onChanged();
         return this;
       }
 
-      private com.google.protobuf.SingleFieldBuilderV3<
-          ServerProto.ServerMsg, ServerProto.ServerMsg.Builder, ServerProto.ServerMsgOrBuilder> msgBuilder_;
+      private long ack_ ;
       /**
-       * <code>.ServerMsg msg = 2;</code>
+       * <code>int64 ack = 2;</code>
+       * @return The ack.
+       */
+      @java.lang.Override
+      public long getAck() {
+        return ack_;
+      }
+      /**
+       * <code>int64 ack = 2;</code>
+       * @param value The ack to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAck(long value) {
+        
+        ack_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 ack = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAck() {
+        
+        ack_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.fy.chatserver.communicate.proto.ServerProto.ServerMsg, com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.Builder, com.fy.chatserver.communicate.proto.ServerProto.ServerMsgOrBuilder> msgBuilder_;
+      /**
+       * <code>.ServerMsg msg = 3;</code>
        * @return Whether the msg field is set.
        */
       @java.lang.Override
       public boolean hasMsg() {
-        return dataCase_ == 2;
+        return dataCase_ == 3;
       }
       /**
-       * <code>.ServerMsg msg = 2;</code>
+       * <code>.ServerMsg msg = 3;</code>
        * @return The msg.
        */
       @java.lang.Override
-      public ServerProto.ServerMsg getMsg() {
+      public com.fy.chatserver.communicate.proto.ServerProto.ServerMsg getMsg() {
         if (msgBuilder_ == null) {
-          if (dataCase_ == 2) {
-            return (ServerProto.ServerMsg) data_;
+          if (dataCase_ == 3) {
+            return (com.fy.chatserver.communicate.proto.ServerProto.ServerMsg) data_;
           }
-          return ServerProto.ServerMsg.getDefaultInstance();
+          return com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.getDefaultInstance();
         } else {
-          if (dataCase_ == 2) {
+          if (dataCase_ == 3) {
             return msgBuilder_.getMessage();
           }
-          return ServerProto.ServerMsg.getDefaultInstance();
+          return com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.getDefaultInstance();
         }
       }
       /**
-       * <code>.ServerMsg msg = 2;</code>
+       * <code>.ServerMsg msg = 3;</code>
        */
-      public Builder setMsg(ServerProto.ServerMsg value) {
+      public Builder setMsg(com.fy.chatserver.communicate.proto.ServerProto.ServerMsg value) {
         if (msgBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -821,58 +934,57 @@ public final class ServerProto {
         } else {
           msgBuilder_.setMessage(value);
         }
-        dataCase_ = 2;
+        dataCase_ = 3;
         return this;
       }
       /**
-       * <code>.ServerMsg msg = 2;</code>
+       * <code>.ServerMsg msg = 3;</code>
        */
       public Builder setMsg(
-          ServerProto.ServerMsg.Builder builderForValue) {
+          com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.Builder builderForValue) {
         if (msgBuilder_ == null) {
           data_ = builderForValue.build();
           onChanged();
         } else {
           msgBuilder_.setMessage(builderForValue.build());
         }
-        dataCase_ = 2;
+        dataCase_ = 3;
         return this;
       }
       /**
-       * <code>.ServerMsg msg = 2;</code>
+       * <code>.ServerMsg msg = 3;</code>
        */
-      public Builder mergeMsg(ServerProto.ServerMsg value) {
+      public Builder mergeMsg(com.fy.chatserver.communicate.proto.ServerProto.ServerMsg value) {
         if (msgBuilder_ == null) {
-          if (dataCase_ == 2 &&
-              data_ != ServerProto.ServerMsg.getDefaultInstance()) {
-            data_ = ServerProto.ServerMsg.newBuilder((ServerProto.ServerMsg) data_)
+          if (dataCase_ == 3 &&
+              data_ != com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.getDefaultInstance()) {
+            data_ = com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.newBuilder((com.fy.chatserver.communicate.proto.ServerProto.ServerMsg) data_)
                 .mergeFrom(value).buildPartial();
           } else {
             data_ = value;
           }
           onChanged();
         } else {
-          if (dataCase_ == 2) {
+          if (dataCase_ == 3) {
             msgBuilder_.mergeFrom(value);
-          } else {
-            msgBuilder_.setMessage(value);
           }
+          msgBuilder_.setMessage(value);
         }
-        dataCase_ = 2;
+        dataCase_ = 3;
         return this;
       }
       /**
-       * <code>.ServerMsg msg = 2;</code>
+       * <code>.ServerMsg msg = 3;</code>
        */
       public Builder clearMsg() {
         if (msgBuilder_ == null) {
-          if (dataCase_ == 2) {
+          if (dataCase_ == 3) {
             dataCase_ = 0;
             data_ = null;
             onChanged();
           }
         } else {
-          if (dataCase_ == 2) {
+          if (dataCase_ == 3) {
             dataCase_ = 0;
             data_ = null;
           }
@@ -881,79 +993,79 @@ public final class ServerProto {
         return this;
       }
       /**
-       * <code>.ServerMsg msg = 2;</code>
+       * <code>.ServerMsg msg = 3;</code>
        */
-      public ServerProto.ServerMsg.Builder getMsgBuilder() {
+      public com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.Builder getMsgBuilder() {
         return getMsgFieldBuilder().getBuilder();
       }
       /**
-       * <code>.ServerMsg msg = 2;</code>
+       * <code>.ServerMsg msg = 3;</code>
        */
       @java.lang.Override
-      public ServerProto.ServerMsgOrBuilder getMsgOrBuilder() {
-        if ((dataCase_ == 2) && (msgBuilder_ != null)) {
+      public com.fy.chatserver.communicate.proto.ServerProto.ServerMsgOrBuilder getMsgOrBuilder() {
+        if ((dataCase_ == 3) && (msgBuilder_ != null)) {
           return msgBuilder_.getMessageOrBuilder();
         } else {
-          if (dataCase_ == 2) {
-            return (ServerProto.ServerMsg) data_;
+          if (dataCase_ == 3) {
+            return (com.fy.chatserver.communicate.proto.ServerProto.ServerMsg) data_;
           }
-          return ServerProto.ServerMsg.getDefaultInstance();
+          return com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.getDefaultInstance();
         }
       }
       /**
-       * <code>.ServerMsg msg = 2;</code>
+       * <code>.ServerMsg msg = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          ServerProto.ServerMsg, ServerProto.ServerMsg.Builder, ServerProto.ServerMsgOrBuilder>
+          com.fy.chatserver.communicate.proto.ServerProto.ServerMsg, com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.Builder, com.fy.chatserver.communicate.proto.ServerProto.ServerMsgOrBuilder> 
           getMsgFieldBuilder() {
         if (msgBuilder_ == null) {
-          if (!(dataCase_ == 2)) {
-            data_ = ServerProto.ServerMsg.getDefaultInstance();
+          if (!(dataCase_ == 3)) {
+            data_ = com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.getDefaultInstance();
           }
           msgBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              ServerProto.ServerMsg, ServerProto.ServerMsg.Builder, ServerProto.ServerMsgOrBuilder>(
-                  (ServerProto.ServerMsg) data_,
+              com.fy.chatserver.communicate.proto.ServerProto.ServerMsg, com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.Builder, com.fy.chatserver.communicate.proto.ServerProto.ServerMsgOrBuilder>(
+                  (com.fy.chatserver.communicate.proto.ServerProto.ServerMsg) data_,
                   getParentForChildren(),
                   isClean());
           data_ = null;
         }
-        dataCase_ = 2;
-        onChanged();
+        dataCase_ = 3;
+        onChanged();;
         return msgBuilder_;
       }
 
       private com.google.protobuf.SingleFieldBuilderV3<
-          ClientProto.Notification, ClientProto.Notification.Builder, ClientProto.NotificationOrBuilder> notificationBuilder_;
+          com.fy.chatserver.communicate.proto.ClientProto.Notification, com.fy.chatserver.communicate.proto.ClientProto.Notification.Builder, com.fy.chatserver.communicate.proto.ClientProto.NotificationOrBuilder> notificationBuilder_;
       /**
-       * <code>.Notification notification = 3;</code>
+       * <code>.Notification notification = 4;</code>
        * @return Whether the notification field is set.
        */
       @java.lang.Override
       public boolean hasNotification() {
-        return dataCase_ == 3;
+        return dataCase_ == 4;
       }
       /**
-       * <code>.Notification notification = 3;</code>
+       * <code>.Notification notification = 4;</code>
        * @return The notification.
        */
       @java.lang.Override
-      public ClientProto.Notification getNotification() {
+      public com.fy.chatserver.communicate.proto.ClientProto.Notification getNotification() {
         if (notificationBuilder_ == null) {
-          if (dataCase_ == 3) {
-            return (ClientProto.Notification) data_;
+          if (dataCase_ == 4) {
+            return (com.fy.chatserver.communicate.proto.ClientProto.Notification) data_;
           }
-          return ClientProto.Notification.getDefaultInstance();
+          return com.fy.chatserver.communicate.proto.ClientProto.Notification.getDefaultInstance();
         } else {
-          if (dataCase_ == 3) {
+          if (dataCase_ == 4) {
             return notificationBuilder_.getMessage();
           }
-          return ClientProto.Notification.getDefaultInstance();
+          return com.fy.chatserver.communicate.proto.ClientProto.Notification.getDefaultInstance();
         }
       }
       /**
-       * <code>.Notification notification = 3;</code>
+       * <code>.Notification notification = 4;</code>
        */
-      public Builder setNotification(ClientProto.Notification value) {
+      public Builder setNotification(com.fy.chatserver.communicate.proto.ClientProto.Notification value) {
         if (notificationBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -963,58 +1075,57 @@ public final class ServerProto {
         } else {
           notificationBuilder_.setMessage(value);
         }
-        dataCase_ = 3;
+        dataCase_ = 4;
         return this;
       }
       /**
-       * <code>.Notification notification = 3;</code>
+       * <code>.Notification notification = 4;</code>
        */
       public Builder setNotification(
-          ClientProto.Notification.Builder builderForValue) {
+          com.fy.chatserver.communicate.proto.ClientProto.Notification.Builder builderForValue) {
         if (notificationBuilder_ == null) {
           data_ = builderForValue.build();
           onChanged();
         } else {
           notificationBuilder_.setMessage(builderForValue.build());
         }
-        dataCase_ = 3;
+        dataCase_ = 4;
         return this;
       }
       /**
-       * <code>.Notification notification = 3;</code>
+       * <code>.Notification notification = 4;</code>
        */
-      public Builder mergeNotification(ClientProto.Notification value) {
+      public Builder mergeNotification(com.fy.chatserver.communicate.proto.ClientProto.Notification value) {
         if (notificationBuilder_ == null) {
-          if (dataCase_ == 3 &&
-              data_ != ClientProto.Notification.getDefaultInstance()) {
-            data_ = ClientProto.Notification.newBuilder((ClientProto.Notification) data_)
+          if (dataCase_ == 4 &&
+              data_ != com.fy.chatserver.communicate.proto.ClientProto.Notification.getDefaultInstance()) {
+            data_ = com.fy.chatserver.communicate.proto.ClientProto.Notification.newBuilder((com.fy.chatserver.communicate.proto.ClientProto.Notification) data_)
                 .mergeFrom(value).buildPartial();
           } else {
             data_ = value;
           }
           onChanged();
         } else {
-          if (dataCase_ == 3) {
+          if (dataCase_ == 4) {
             notificationBuilder_.mergeFrom(value);
-          } else {
-            notificationBuilder_.setMessage(value);
           }
+          notificationBuilder_.setMessage(value);
         }
-        dataCase_ = 3;
+        dataCase_ = 4;
         return this;
       }
       /**
-       * <code>.Notification notification = 3;</code>
+       * <code>.Notification notification = 4;</code>
        */
       public Builder clearNotification() {
         if (notificationBuilder_ == null) {
-          if (dataCase_ == 3) {
+          if (dataCase_ == 4) {
             dataCase_ = 0;
             data_ = null;
             onChanged();
           }
         } else {
-          if (dataCase_ == 3) {
+          if (dataCase_ == 4) {
             dataCase_ = 0;
             data_ = null;
           }
@@ -1023,79 +1134,79 @@ public final class ServerProto {
         return this;
       }
       /**
-       * <code>.Notification notification = 3;</code>
+       * <code>.Notification notification = 4;</code>
        */
-      public ClientProto.Notification.Builder getNotificationBuilder() {
+      public com.fy.chatserver.communicate.proto.ClientProto.Notification.Builder getNotificationBuilder() {
         return getNotificationFieldBuilder().getBuilder();
       }
       /**
-       * <code>.Notification notification = 3;</code>
+       * <code>.Notification notification = 4;</code>
        */
       @java.lang.Override
-      public ClientProto.NotificationOrBuilder getNotificationOrBuilder() {
-        if ((dataCase_ == 3) && (notificationBuilder_ != null)) {
+      public com.fy.chatserver.communicate.proto.ClientProto.NotificationOrBuilder getNotificationOrBuilder() {
+        if ((dataCase_ == 4) && (notificationBuilder_ != null)) {
           return notificationBuilder_.getMessageOrBuilder();
         } else {
-          if (dataCase_ == 3) {
-            return (ClientProto.Notification) data_;
+          if (dataCase_ == 4) {
+            return (com.fy.chatserver.communicate.proto.ClientProto.Notification) data_;
           }
-          return ClientProto.Notification.getDefaultInstance();
+          return com.fy.chatserver.communicate.proto.ClientProto.Notification.getDefaultInstance();
         }
       }
       /**
-       * <code>.Notification notification = 3;</code>
+       * <code>.Notification notification = 4;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          ClientProto.Notification, ClientProto.Notification.Builder, ClientProto.NotificationOrBuilder>
+          com.fy.chatserver.communicate.proto.ClientProto.Notification, com.fy.chatserver.communicate.proto.ClientProto.Notification.Builder, com.fy.chatserver.communicate.proto.ClientProto.NotificationOrBuilder> 
           getNotificationFieldBuilder() {
         if (notificationBuilder_ == null) {
-          if (!(dataCase_ == 3)) {
-            data_ = ClientProto.Notification.getDefaultInstance();
+          if (!(dataCase_ == 4)) {
+            data_ = com.fy.chatserver.communicate.proto.ClientProto.Notification.getDefaultInstance();
           }
           notificationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              ClientProto.Notification, ClientProto.Notification.Builder, ClientProto.NotificationOrBuilder>(
-                  (ClientProto.Notification) data_,
+              com.fy.chatserver.communicate.proto.ClientProto.Notification, com.fy.chatserver.communicate.proto.ClientProto.Notification.Builder, com.fy.chatserver.communicate.proto.ClientProto.NotificationOrBuilder>(
+                  (com.fy.chatserver.communicate.proto.ClientProto.Notification) data_,
                   getParentForChildren(),
                   isClean());
           data_ = null;
         }
-        dataCase_ = 3;
-        onChanged();
+        dataCase_ = 4;
+        onChanged();;
         return notificationBuilder_;
       }
 
       private com.google.protobuf.SingleFieldBuilderV3<
-          ClientProto.Heartbeat, ClientProto.Heartbeat.Builder, ClientProto.HeartbeatOrBuilder> heartbeatBuilder_;
+          com.fy.chatserver.communicate.proto.ClientProto.Heartbeat, com.fy.chatserver.communicate.proto.ClientProto.Heartbeat.Builder, com.fy.chatserver.communicate.proto.ClientProto.HeartbeatOrBuilder> heartbeatBuilder_;
       /**
-       * <code>.Heartbeat heartbeat = 4;</code>
+       * <code>.Heartbeat heartbeat = 5;</code>
        * @return Whether the heartbeat field is set.
        */
       @java.lang.Override
       public boolean hasHeartbeat() {
-        return dataCase_ == 4;
+        return dataCase_ == 5;
       }
       /**
-       * <code>.Heartbeat heartbeat = 4;</code>
+       * <code>.Heartbeat heartbeat = 5;</code>
        * @return The heartbeat.
        */
       @java.lang.Override
-      public ClientProto.Heartbeat getHeartbeat() {
+      public com.fy.chatserver.communicate.proto.ClientProto.Heartbeat getHeartbeat() {
         if (heartbeatBuilder_ == null) {
-          if (dataCase_ == 4) {
-            return (ClientProto.Heartbeat) data_;
+          if (dataCase_ == 5) {
+            return (com.fy.chatserver.communicate.proto.ClientProto.Heartbeat) data_;
           }
-          return ClientProto.Heartbeat.getDefaultInstance();
+          return com.fy.chatserver.communicate.proto.ClientProto.Heartbeat.getDefaultInstance();
         } else {
-          if (dataCase_ == 4) {
+          if (dataCase_ == 5) {
             return heartbeatBuilder_.getMessage();
           }
-          return ClientProto.Heartbeat.getDefaultInstance();
+          return com.fy.chatserver.communicate.proto.ClientProto.Heartbeat.getDefaultInstance();
         }
       }
       /**
-       * <code>.Heartbeat heartbeat = 4;</code>
+       * <code>.Heartbeat heartbeat = 5;</code>
        */
-      public Builder setHeartbeat(ClientProto.Heartbeat value) {
+      public Builder setHeartbeat(com.fy.chatserver.communicate.proto.ClientProto.Heartbeat value) {
         if (heartbeatBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -1105,58 +1216,57 @@ public final class ServerProto {
         } else {
           heartbeatBuilder_.setMessage(value);
         }
-        dataCase_ = 4;
+        dataCase_ = 5;
         return this;
       }
       /**
-       * <code>.Heartbeat heartbeat = 4;</code>
+       * <code>.Heartbeat heartbeat = 5;</code>
        */
       public Builder setHeartbeat(
-          ClientProto.Heartbeat.Builder builderForValue) {
+          com.fy.chatserver.communicate.proto.ClientProto.Heartbeat.Builder builderForValue) {
         if (heartbeatBuilder_ == null) {
           data_ = builderForValue.build();
           onChanged();
         } else {
           heartbeatBuilder_.setMessage(builderForValue.build());
         }
-        dataCase_ = 4;
+        dataCase_ = 5;
         return this;
       }
       /**
-       * <code>.Heartbeat heartbeat = 4;</code>
+       * <code>.Heartbeat heartbeat = 5;</code>
        */
-      public Builder mergeHeartbeat(ClientProto.Heartbeat value) {
+      public Builder mergeHeartbeat(com.fy.chatserver.communicate.proto.ClientProto.Heartbeat value) {
         if (heartbeatBuilder_ == null) {
-          if (dataCase_ == 4 &&
-              data_ != ClientProto.Heartbeat.getDefaultInstance()) {
-            data_ = ClientProto.Heartbeat.newBuilder((ClientProto.Heartbeat) data_)
+          if (dataCase_ == 5 &&
+              data_ != com.fy.chatserver.communicate.proto.ClientProto.Heartbeat.getDefaultInstance()) {
+            data_ = com.fy.chatserver.communicate.proto.ClientProto.Heartbeat.newBuilder((com.fy.chatserver.communicate.proto.ClientProto.Heartbeat) data_)
                 .mergeFrom(value).buildPartial();
           } else {
             data_ = value;
           }
           onChanged();
         } else {
-          if (dataCase_ == 4) {
+          if (dataCase_ == 5) {
             heartbeatBuilder_.mergeFrom(value);
-          } else {
-            heartbeatBuilder_.setMessage(value);
           }
+          heartbeatBuilder_.setMessage(value);
         }
-        dataCase_ = 4;
+        dataCase_ = 5;
         return this;
       }
       /**
-       * <code>.Heartbeat heartbeat = 4;</code>
+       * <code>.Heartbeat heartbeat = 5;</code>
        */
       public Builder clearHeartbeat() {
         if (heartbeatBuilder_ == null) {
-          if (dataCase_ == 4) {
+          if (dataCase_ == 5) {
             dataCase_ = 0;
             data_ = null;
             onChanged();
           }
         } else {
-          if (dataCase_ == 4) {
+          if (dataCase_ == 5) {
             dataCase_ = 0;
             data_ = null;
           }
@@ -1165,44 +1275,44 @@ public final class ServerProto {
         return this;
       }
       /**
-       * <code>.Heartbeat heartbeat = 4;</code>
+       * <code>.Heartbeat heartbeat = 5;</code>
        */
-      public ClientProto.Heartbeat.Builder getHeartbeatBuilder() {
+      public com.fy.chatserver.communicate.proto.ClientProto.Heartbeat.Builder getHeartbeatBuilder() {
         return getHeartbeatFieldBuilder().getBuilder();
       }
       /**
-       * <code>.Heartbeat heartbeat = 4;</code>
+       * <code>.Heartbeat heartbeat = 5;</code>
        */
       @java.lang.Override
-      public ClientProto.HeartbeatOrBuilder getHeartbeatOrBuilder() {
-        if ((dataCase_ == 4) && (heartbeatBuilder_ != null)) {
+      public com.fy.chatserver.communicate.proto.ClientProto.HeartbeatOrBuilder getHeartbeatOrBuilder() {
+        if ((dataCase_ == 5) && (heartbeatBuilder_ != null)) {
           return heartbeatBuilder_.getMessageOrBuilder();
         } else {
-          if (dataCase_ == 4) {
-            return (ClientProto.Heartbeat) data_;
+          if (dataCase_ == 5) {
+            return (com.fy.chatserver.communicate.proto.ClientProto.Heartbeat) data_;
           }
-          return ClientProto.Heartbeat.getDefaultInstance();
+          return com.fy.chatserver.communicate.proto.ClientProto.Heartbeat.getDefaultInstance();
         }
       }
       /**
-       * <code>.Heartbeat heartbeat = 4;</code>
+       * <code>.Heartbeat heartbeat = 5;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          ClientProto.Heartbeat, ClientProto.Heartbeat.Builder, ClientProto.HeartbeatOrBuilder>
+          com.fy.chatserver.communicate.proto.ClientProto.Heartbeat, com.fy.chatserver.communicate.proto.ClientProto.Heartbeat.Builder, com.fy.chatserver.communicate.proto.ClientProto.HeartbeatOrBuilder> 
           getHeartbeatFieldBuilder() {
         if (heartbeatBuilder_ == null) {
-          if (!(dataCase_ == 4)) {
-            data_ = ClientProto.Heartbeat.getDefaultInstance();
+          if (!(dataCase_ == 5)) {
+            data_ = com.fy.chatserver.communicate.proto.ClientProto.Heartbeat.getDefaultInstance();
           }
           heartbeatBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              ClientProto.Heartbeat, ClientProto.Heartbeat.Builder, ClientProto.HeartbeatOrBuilder>(
-                  (ClientProto.Heartbeat) data_,
+              com.fy.chatserver.communicate.proto.ClientProto.Heartbeat, com.fy.chatserver.communicate.proto.ClientProto.Heartbeat.Builder, com.fy.chatserver.communicate.proto.ClientProto.HeartbeatOrBuilder>(
+                  (com.fy.chatserver.communicate.proto.ClientProto.Heartbeat) data_,
                   getParentForChildren(),
                   isClean());
           data_ = null;
         }
-        dataCase_ = 4;
-        onChanged();
+        dataCase_ = 5;
+        onChanged();;
         return heartbeatBuilder_;
       }
       @java.lang.Override
@@ -1222,12 +1332,12 @@ public final class ServerProto {
     }
 
     // @@protoc_insertion_point(class_scope:SInner)
-    private static final ServerProto.SInner DEFAULT_INSTANCE;
+    private static final com.fy.chatserver.communicate.proto.ServerProto.SInner DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new ServerProto.SInner();
+      DEFAULT_INSTANCE = new com.fy.chatserver.communicate.proto.ServerProto.SInner();
     }
 
-    public static ServerProto.SInner getDefaultInstance() {
+    public static com.fy.chatserver.communicate.proto.ServerProto.SInner getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1238,18 +1348,7 @@ public final class ServerProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        Builder builder = newBuilder();
-        try {
-          builder.mergeFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (com.google.protobuf.UninitializedMessageException e) {
-          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
-        }
-        return builder.buildPartial();
+        return new SInner(input, extensionRegistry);
       }
     };
 
@@ -1263,7 +1362,7 @@ public final class ServerProto {
     }
 
     @java.lang.Override
-    public ServerProto.SInner getDefaultInstanceForType() {
+    public com.fy.chatserver.communicate.proto.ServerProto.SInner getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1286,25 +1385,19 @@ public final class ServerProto {
         getServerIdBytes();
 
     /**
-     * <code>int64 ack = 2;</code>
-     * @return The ack.
-     */
-    long getAck();
-
-    /**
-     * <code>.Msg msg = 3;</code>
+     * <code>.Msg msg = 2;</code>
      * @return Whether the msg field is set.
      */
     boolean hasMsg();
     /**
-     * <code>.Msg msg = 3;</code>
+     * <code>.Msg msg = 2;</code>
      * @return The msg.
      */
-    ClientProto.Msg getMsg();
+    com.fy.chatserver.communicate.proto.ClientProto.Msg getMsg();
     /**
-     * <code>.Msg msg = 3;</code>
+     * <code>.Msg msg = 2;</code>
      */
-    ClientProto.MsgOrBuilder getMsgOrBuilder();
+    com.fy.chatserver.communicate.proto.ClientProto.MsgOrBuilder getMsgOrBuilder();
   }
   /**
    * Protobuf type {@code ServerMsg}
@@ -1329,22 +1422,82 @@ public final class ServerProto {
       return new ServerMsg();
     }
 
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ServerMsg(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              serverId_ = s;
+              break;
+            }
+            case 18: {
+              com.fy.chatserver.communicate.proto.ClientProto.Msg.Builder subBuilder = null;
+              if (msg_ != null) {
+                subBuilder = msg_.toBuilder();
+              }
+              msg_ = input.readMessage(com.fy.chatserver.communicate.proto.ClientProto.Msg.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(msg_);
+                msg_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return ServerProto.internal_static_ServerMsg_descriptor;
+      return com.fy.chatserver.communicate.proto.ServerProto.internal_static_ServerMsg_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return ServerProto.internal_static_ServerMsg_fieldAccessorTable
+      return com.fy.chatserver.communicate.proto.ServerProto.internal_static_ServerMsg_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              ServerProto.ServerMsg.class, ServerProto.ServerMsg.Builder.class);
+              com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.class, com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.Builder.class);
     }
 
     public static final int SERVERID_FIELD_NUMBER = 1;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object serverId_ = "";
+    private volatile java.lang.Object serverId_;
     /**
      * <code>string serverId = 1;</code>
      * @return The serverId.
@@ -1381,21 +1534,10 @@ public final class ServerProto {
       }
     }
 
-    public static final int ACK_FIELD_NUMBER = 2;
-    private long ack_ = 0L;
+    public static final int MSG_FIELD_NUMBER = 2;
+    private com.fy.chatserver.communicate.proto.ClientProto.Msg msg_;
     /**
-     * <code>int64 ack = 2;</code>
-     * @return The ack.
-     */
-    @java.lang.Override
-    public long getAck() {
-      return ack_;
-    }
-
-    public static final int MSG_FIELD_NUMBER = 3;
-    private ClientProto.Msg msg_;
-    /**
-     * <code>.Msg msg = 3;</code>
+     * <code>.Msg msg = 2;</code>
      * @return Whether the msg field is set.
      */
     @java.lang.Override
@@ -1403,19 +1545,19 @@ public final class ServerProto {
       return msg_ != null;
     }
     /**
-     * <code>.Msg msg = 3;</code>
+     * <code>.Msg msg = 2;</code>
      * @return The msg.
      */
     @java.lang.Override
-    public ClientProto.Msg getMsg() {
-      return msg_ == null ? ClientProto.Msg.getDefaultInstance() : msg_;
+    public com.fy.chatserver.communicate.proto.ClientProto.Msg getMsg() {
+      return msg_ == null ? com.fy.chatserver.communicate.proto.ClientProto.Msg.getDefaultInstance() : msg_;
     }
     /**
-     * <code>.Msg msg = 3;</code>
+     * <code>.Msg msg = 2;</code>
      */
     @java.lang.Override
-    public ClientProto.MsgOrBuilder getMsgOrBuilder() {
-      return msg_ == null ? ClientProto.Msg.getDefaultInstance() : msg_;
+    public com.fy.chatserver.communicate.proto.ClientProto.MsgOrBuilder getMsgOrBuilder() {
+      return getMsg();
     }
 
     private byte memoizedIsInitialized = -1;
@@ -1435,13 +1577,10 @@ public final class ServerProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serverId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, serverId_);
       }
-      if (ack_ != 0L) {
-        output.writeInt64(2, ack_);
-      }
       if (msg_ != null) {
-        output.writeMessage(3, getMsg());
+        output.writeMessage(2, getMsg());
       }
-      getUnknownFields().writeTo(output);
+      unknownFields.writeTo(output);
     }
 
     @java.lang.Override
@@ -1453,15 +1592,11 @@ public final class ServerProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serverId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, serverId_);
       }
-      if (ack_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(2, ack_);
-      }
       if (msg_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, getMsg());
+          .computeMessageSize(2, getMsg());
       }
-      size += getUnknownFields().getSerializedSize();
+      size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -1471,21 +1606,19 @@ public final class ServerProto {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof ServerProto.ServerMsg)) {
+      if (!(obj instanceof com.fy.chatserver.communicate.proto.ServerProto.ServerMsg)) {
         return super.equals(obj);
       }
-      ServerProto.ServerMsg other = (ServerProto.ServerMsg) obj;
+      com.fy.chatserver.communicate.proto.ServerProto.ServerMsg other = (com.fy.chatserver.communicate.proto.ServerProto.ServerMsg) obj;
 
       if (!getServerId()
           .equals(other.getServerId())) return false;
-      if (getAck()
-          != other.getAck()) return false;
       if (hasMsg() != other.hasMsg()) return false;
       if (hasMsg()) {
         if (!getMsg()
             .equals(other.getMsg())) return false;
       }
-      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
 
@@ -1498,83 +1631,78 @@ public final class ServerProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + SERVERID_FIELD_NUMBER;
       hash = (53 * hash) + getServerId().hashCode();
-      hash = (37 * hash) + ACK_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getAck());
       if (hasMsg()) {
         hash = (37 * hash) + MSG_FIELD_NUMBER;
         hash = (53 * hash) + getMsg().hashCode();
       }
-      hash = (29 * hash) + getUnknownFields().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
     }
 
-    public static ServerProto.ServerMsg parseFrom(
+    public static com.fy.chatserver.communicate.proto.ServerProto.ServerMsg parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ServerProto.ServerMsg parseFrom(
+    public static com.fy.chatserver.communicate.proto.ServerProto.ServerMsg parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ServerProto.ServerMsg parseFrom(
+    public static com.fy.chatserver.communicate.proto.ServerProto.ServerMsg parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ServerProto.ServerMsg parseFrom(
+    public static com.fy.chatserver.communicate.proto.ServerProto.ServerMsg parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ServerProto.ServerMsg parseFrom(byte[] data)
+    public static com.fy.chatserver.communicate.proto.ServerProto.ServerMsg parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static ServerProto.ServerMsg parseFrom(
+    public static com.fy.chatserver.communicate.proto.ServerProto.ServerMsg parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static ServerProto.ServerMsg parseFrom(java.io.InputStream input)
+    public static com.fy.chatserver.communicate.proto.ServerProto.ServerMsg parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ServerProto.ServerMsg parseFrom(
+    public static com.fy.chatserver.communicate.proto.ServerProto.ServerMsg parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
-
-    public static ServerProto.ServerMsg parseDelimitedFrom(java.io.InputStream input)
+    public static com.fy.chatserver.communicate.proto.ServerProto.ServerMsg parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
-
-    public static ServerProto.ServerMsg parseDelimitedFrom(
+    public static com.fy.chatserver.communicate.proto.ServerProto.ServerMsg parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static ServerProto.ServerMsg parseFrom(
+    public static com.fy.chatserver.communicate.proto.ServerProto.ServerMsg parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static ServerProto.ServerMsg parseFrom(
+    public static com.fy.chatserver.communicate.proto.ServerProto.ServerMsg parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -1587,7 +1715,7 @@ public final class ServerProto {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(ServerProto.ServerMsg prototype) {
+    public static Builder newBuilder(com.fy.chatserver.communicate.proto.ServerProto.ServerMsg prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -1608,39 +1736,44 @@ public final class ServerProto {
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:ServerMsg)
-        ServerProto.ServerMsgOrBuilder {
+        com.fy.chatserver.communicate.proto.ServerProto.ServerMsgOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return ServerProto.internal_static_ServerMsg_descriptor;
+        return com.fy.chatserver.communicate.proto.ServerProto.internal_static_ServerMsg_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return ServerProto.internal_static_ServerMsg_fieldAccessorTable
+        return com.fy.chatserver.communicate.proto.ServerProto.internal_static_ServerMsg_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                ServerProto.ServerMsg.class, ServerProto.ServerMsg.Builder.class);
+                com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.class, com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.Builder.class);
       }
 
-      // Construct using com.fy.chatserver.communicate.ServerProto.ServerMsg.newBuilder()
+      // Construct using com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.newBuilder()
       private Builder() {
-
+        maybeForceBuilderInitialization();
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        bitField0_ = 0;
         serverId_ = "";
-        ack_ = 0L;
-        msg_ = null;
-        if (msgBuilder_ != null) {
-          msgBuilder_.dispose();
+
+        if (msgBuilder_ == null) {
+          msg_ = null;
+        } else {
+          msg_ = null;
           msgBuilder_ = null;
         }
         return this;
@@ -1649,17 +1782,17 @@ public final class ServerProto {
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return ServerProto.internal_static_ServerMsg_descriptor;
+        return com.fy.chatserver.communicate.proto.ServerProto.internal_static_ServerMsg_descriptor;
       }
 
       @java.lang.Override
-      public ServerProto.ServerMsg getDefaultInstanceForType() {
-        return ServerProto.ServerMsg.getDefaultInstance();
+      public com.fy.chatserver.communicate.proto.ServerProto.ServerMsg getDefaultInstanceForType() {
+        return com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.getDefaultInstance();
       }
 
       @java.lang.Override
-      public ServerProto.ServerMsg build() {
-        ServerProto.ServerMsg result = buildPartial();
+      public com.fy.chatserver.communicate.proto.ServerProto.ServerMsg build() {
+        com.fy.chatserver.communicate.proto.ServerProto.ServerMsg result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -1667,26 +1800,16 @@ public final class ServerProto {
       }
 
       @java.lang.Override
-      public ServerProto.ServerMsg buildPartial() {
-        ServerProto.ServerMsg result = new ServerProto.ServerMsg(this);
-        if (bitField0_ != 0) { buildPartial0(result); }
+      public com.fy.chatserver.communicate.proto.ServerProto.ServerMsg buildPartial() {
+        com.fy.chatserver.communicate.proto.ServerProto.ServerMsg result = new com.fy.chatserver.communicate.proto.ServerProto.ServerMsg(this);
+        result.serverId_ = serverId_;
+        if (msgBuilder_ == null) {
+          result.msg_ = msg_;
+        } else {
+          result.msg_ = msgBuilder_.build();
+        }
         onBuilt();
         return result;
-      }
-
-      private void buildPartial0(ServerProto.ServerMsg result) {
-        int from_bitField0_ = bitField0_;
-        if (((from_bitField0_ & 0x00000001) != 0)) {
-          result.serverId_ = serverId_;
-        }
-        if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.ack_ = ack_;
-        }
-        if (((from_bitField0_ & 0x00000004) != 0)) {
-          result.msg_ = msgBuilder_ == null
-              ? msg_
-              : msgBuilder_.build();
-        }
       }
 
       @java.lang.Override
@@ -1723,28 +1846,24 @@ public final class ServerProto {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof ServerProto.ServerMsg) {
-          return mergeFrom((ServerProto.ServerMsg)other);
+        if (other instanceof com.fy.chatserver.communicate.proto.ServerProto.ServerMsg) {
+          return mergeFrom((com.fy.chatserver.communicate.proto.ServerProto.ServerMsg)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(ServerProto.ServerMsg other) {
-        if (other == ServerProto.ServerMsg.getDefaultInstance()) return this;
+      public Builder mergeFrom(com.fy.chatserver.communicate.proto.ServerProto.ServerMsg other) {
+        if (other == com.fy.chatserver.communicate.proto.ServerProto.ServerMsg.getDefaultInstance()) return this;
         if (!other.getServerId().isEmpty()) {
           serverId_ = other.serverId_;
-          bitField0_ |= 0x00000001;
           onChanged();
-        }
-        if (other.getAck() != 0L) {
-          setAck(other.getAck());
         }
         if (other.hasMsg()) {
           mergeMsg(other.getMsg());
         }
-        this.mergeUnknownFields(other.getUnknownFields());
+        this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
       }
@@ -1759,50 +1878,19 @@ public final class ServerProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        if (extensionRegistry == null) {
-          throw new java.lang.NullPointerException();
-        }
+        com.fy.chatserver.communicate.proto.ServerProto.ServerMsg parsedMessage = null;
         try {
-          boolean done = false;
-          while (!done) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                done = true;
-                break;
-              case 10: {
-                serverId_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000001;
-                break;
-              } // case 10
-              case 16: {
-                ack_ = input.readInt64();
-                bitField0_ |= 0x00000002;
-                break;
-              } // case 16
-              case 26: {
-                input.readMessage(
-                    getMsgFieldBuilder().getBuilder(),
-                    extensionRegistry);
-                bitField0_ |= 0x00000004;
-                break;
-              } // case 26
-              default: {
-                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
-                  done = true; // was an endgroup tag
-                }
-                break;
-              } // default:
-            } // switch (tag)
-          } // while (!done)
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.fy.chatserver.communicate.proto.ServerProto.ServerMsg) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          onChanged();
-        } // finally
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
         return this;
       }
-      private int bitField0_;
 
       private java.lang.Object serverId_ = "";
       /**
@@ -1845,9 +1933,11 @@ public final class ServerProto {
        */
       public Builder setServerId(
           java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
         serverId_ = value;
-        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -1856,8 +1946,8 @@ public final class ServerProto {
        * @return This builder for chaining.
        */
       public Builder clearServerId() {
+        
         serverId_ = getDefaultInstance().getServerId();
-        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -1868,157 +1958,127 @@ public final class ServerProto {
        */
       public Builder setServerIdBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
         serverId_ = value;
-        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
 
-      private long ack_ ;
-      /**
-       * <code>int64 ack = 2;</code>
-       * @return The ack.
-       */
-      @java.lang.Override
-      public long getAck() {
-        return ack_;
-      }
-      /**
-       * <code>int64 ack = 2;</code>
-       * @param value The ack to set.
-       * @return This builder for chaining.
-       */
-      public Builder setAck(long value) {
-
-        ack_ = value;
-        bitField0_ |= 0x00000002;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int64 ack = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearAck() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        ack_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private ClientProto.Msg msg_;
+      private com.fy.chatserver.communicate.proto.ClientProto.Msg msg_;
       private com.google.protobuf.SingleFieldBuilderV3<
-          ClientProto.Msg, ClientProto.Msg.Builder, ClientProto.MsgOrBuilder> msgBuilder_;
+          com.fy.chatserver.communicate.proto.ClientProto.Msg, com.fy.chatserver.communicate.proto.ClientProto.Msg.Builder, com.fy.chatserver.communicate.proto.ClientProto.MsgOrBuilder> msgBuilder_;
       /**
-       * <code>.Msg msg = 3;</code>
+       * <code>.Msg msg = 2;</code>
        * @return Whether the msg field is set.
        */
       public boolean hasMsg() {
-        return ((bitField0_ & 0x00000004) != 0);
+        return msgBuilder_ != null || msg_ != null;
       }
       /**
-       * <code>.Msg msg = 3;</code>
+       * <code>.Msg msg = 2;</code>
        * @return The msg.
        */
-      public ClientProto.Msg getMsg() {
+      public com.fy.chatserver.communicate.proto.ClientProto.Msg getMsg() {
         if (msgBuilder_ == null) {
-          return msg_ == null ? ClientProto.Msg.getDefaultInstance() : msg_;
+          return msg_ == null ? com.fy.chatserver.communicate.proto.ClientProto.Msg.getDefaultInstance() : msg_;
         } else {
           return msgBuilder_.getMessage();
         }
       }
       /**
-       * <code>.Msg msg = 3;</code>
+       * <code>.Msg msg = 2;</code>
        */
-      public Builder setMsg(ClientProto.Msg value) {
+      public Builder setMsg(com.fy.chatserver.communicate.proto.ClientProto.Msg value) {
         if (msgBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
           msg_ = value;
+          onChanged();
         } else {
           msgBuilder_.setMessage(value);
         }
-        bitField0_ |= 0x00000004;
-        onChanged();
+
         return this;
       }
       /**
-       * <code>.Msg msg = 3;</code>
+       * <code>.Msg msg = 2;</code>
        */
       public Builder setMsg(
-          ClientProto.Msg.Builder builderForValue) {
+          com.fy.chatserver.communicate.proto.ClientProto.Msg.Builder builderForValue) {
         if (msgBuilder_ == null) {
           msg_ = builderForValue.build();
+          onChanged();
         } else {
           msgBuilder_.setMessage(builderForValue.build());
         }
-        bitField0_ |= 0x00000004;
-        onChanged();
+
         return this;
       }
       /**
-       * <code>.Msg msg = 3;</code>
+       * <code>.Msg msg = 2;</code>
        */
-      public Builder mergeMsg(ClientProto.Msg value) {
+      public Builder mergeMsg(com.fy.chatserver.communicate.proto.ClientProto.Msg value) {
         if (msgBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) != 0) &&
-            msg_ != null &&
-            msg_ != ClientProto.Msg.getDefaultInstance()) {
-            getMsgBuilder().mergeFrom(value);
+          if (msg_ != null) {
+            msg_ =
+              com.fy.chatserver.communicate.proto.ClientProto.Msg.newBuilder(msg_).mergeFrom(value).buildPartial();
           } else {
             msg_ = value;
           }
+          onChanged();
         } else {
           msgBuilder_.mergeFrom(value);
         }
-        bitField0_ |= 0x00000004;
-        onChanged();
+
         return this;
       }
       /**
-       * <code>.Msg msg = 3;</code>
+       * <code>.Msg msg = 2;</code>
        */
       public Builder clearMsg() {
-        bitField0_ = (bitField0_ & ~0x00000004);
-        msg_ = null;
-        if (msgBuilder_ != null) {
-          msgBuilder_.dispose();
+        if (msgBuilder_ == null) {
+          msg_ = null;
+          onChanged();
+        } else {
+          msg_ = null;
           msgBuilder_ = null;
         }
-        onChanged();
+
         return this;
       }
       /**
-       * <code>.Msg msg = 3;</code>
+       * <code>.Msg msg = 2;</code>
        */
-      public ClientProto.Msg.Builder getMsgBuilder() {
-        bitField0_ |= 0x00000004;
+      public com.fy.chatserver.communicate.proto.ClientProto.Msg.Builder getMsgBuilder() {
+        
         onChanged();
         return getMsgFieldBuilder().getBuilder();
       }
       /**
-       * <code>.Msg msg = 3;</code>
+       * <code>.Msg msg = 2;</code>
        */
-      public ClientProto.MsgOrBuilder getMsgOrBuilder() {
+      public com.fy.chatserver.communicate.proto.ClientProto.MsgOrBuilder getMsgOrBuilder() {
         if (msgBuilder_ != null) {
           return msgBuilder_.getMessageOrBuilder();
         } else {
           return msg_ == null ?
-              ClientProto.Msg.getDefaultInstance() : msg_;
+              com.fy.chatserver.communicate.proto.ClientProto.Msg.getDefaultInstance() : msg_;
         }
       }
       /**
-       * <code>.Msg msg = 3;</code>
+       * <code>.Msg msg = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          ClientProto.Msg, ClientProto.Msg.Builder, ClientProto.MsgOrBuilder>
+          com.fy.chatserver.communicate.proto.ClientProto.Msg, com.fy.chatserver.communicate.proto.ClientProto.Msg.Builder, com.fy.chatserver.communicate.proto.ClientProto.MsgOrBuilder> 
           getMsgFieldBuilder() {
         if (msgBuilder_ == null) {
           msgBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              ClientProto.Msg, ClientProto.Msg.Builder, ClientProto.MsgOrBuilder>(
+              com.fy.chatserver.communicate.proto.ClientProto.Msg, com.fy.chatserver.communicate.proto.ClientProto.Msg.Builder, com.fy.chatserver.communicate.proto.ClientProto.MsgOrBuilder>(
                   getMsg(),
                   getParentForChildren(),
                   isClean());
@@ -2043,12 +2103,12 @@ public final class ServerProto {
     }
 
     // @@protoc_insertion_point(class_scope:ServerMsg)
-    private static final ServerProto.ServerMsg DEFAULT_INSTANCE;
+    private static final com.fy.chatserver.communicate.proto.ServerProto.ServerMsg DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new ServerProto.ServerMsg();
+      DEFAULT_INSTANCE = new com.fy.chatserver.communicate.proto.ServerProto.ServerMsg();
     }
 
-    public static ServerProto.ServerMsg getDefaultInstance() {
+    public static com.fy.chatserver.communicate.proto.ServerProto.ServerMsg getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -2059,18 +2119,7 @@ public final class ServerProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        Builder builder = newBuilder();
-        try {
-          builder.mergeFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (com.google.protobuf.UninitializedMessageException e) {
-          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
-        } catch (java.io.IOException e) {
-          throw new com.google.protobuf.InvalidProtocolBufferException(e)
-              .setUnfinishedMessage(builder.buildPartial());
-        }
-        return builder.buildPartial();
+        return new ServerMsg(input, extensionRegistry);
       }
     };
 
@@ -2084,7 +2133,7 @@ public final class ServerProto {
     }
 
     @java.lang.Override
-    public ServerProto.ServerMsg getDefaultInstanceForType() {
+    public com.fy.chatserver.communicate.proto.ServerProto.ServerMsg getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -2110,32 +2159,32 @@ public final class ServerProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\025server_protocol.proto\032\025client_protocol" +
-      ".proto\"\214\001\n\006SInner\022\027\n\004type\030\001 \001(\0162\t.DataTy" +
-      "pe\022\031\n\003msg\030\002 \001(\0132\n.ServerMsgH\000\022%\n\014notific" +
-      "ation\030\003 \001(\0132\r.NotificationH\000\022\037\n\theartbea" +
-      "t\030\004 \001(\0132\n.HeartbeatH\000B\006\n\004data\"=\n\tServerM" +
-      "sg\022\020\n\010serverId\030\001 \001(\t\022\013\n\003ack\030\002 \001(\003\022\021\n\003msg" +
-      "\030\003 \001(\0132\004.MsgB.\n\035com.fy.chatserver.commun" +
-      "icateB\013ServerProtoH\001b\006proto3"
+      ".proto\"\231\001\n\006SInner\022\027\n\004type\030\001 \001(\0162\t.DataTy" +
+      "pe\022\013\n\003ack\030\002 \001(\003\022\031\n\003msg\030\003 \001(\0132\n.ServerMsg" +
+      "H\000\022%\n\014notification\030\004 \001(\0132\r.NotificationH" +
+      "\000\022\037\n\theartbeat\030\005 \001(\0132\n.HeartbeatH\000B\006\n\004da" +
+      "ta\"0\n\tServerMsg\022\020\n\010serverId\030\001 \001(\t\022\021\n\003msg" +
+      "\030\002 \001(\0132\004.MsgB4\n#com.fy.chatserver.commun" +
+      "icate.protoB\013ServerProtoH\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-          ClientProto.getDescriptor(),
+          com.fy.chatserver.communicate.proto.ClientProto.getDescriptor(),
         });
     internal_static_SInner_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_SInner_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_SInner_descriptor,
-        new java.lang.String[] { "Type", "Msg", "Notification", "Heartbeat", "Data", });
+        new java.lang.String[] { "Type", "Ack", "Msg", "Notification", "Heartbeat", "Data", });
     internal_static_ServerMsg_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_ServerMsg_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ServerMsg_descriptor,
-        new java.lang.String[] { "ServerId", "Ack", "Msg", });
-    ClientProto.getDescriptor();
+        new java.lang.String[] { "ServerId", "Msg", });
+    com.fy.chatserver.communicate.proto.ClientProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

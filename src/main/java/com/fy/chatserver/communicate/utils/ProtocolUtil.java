@@ -16,14 +16,14 @@ public class ProtocolUtil {
      * convert ClientProto.CInner to ClientProto.SInner
      * @param protocol ClientProto.CInner
      * @param serviceId service id
-     * @param ack the ack
      * @return ServerProto.SInner
      */
-    public static ServerProto.SInner c2s(ClientProto.CInner protocol, String serviceId, long ack) {
+    public static ServerProto.SInner c2s(ClientProto.CInner protocol, String serviceId) {
         ServerProto.SInner.Builder builder = ServerProto.SInner.newBuilder();
         builder.setType(protocol.getType());
+        builder.setAck(protocol.getAck());
         if (protocol.hasMsg()) {
-            builder.setMsg(ServerProto.ServerMsg.newBuilder().setMsg(protocol.getMsg()).setServerId(serviceId).setAck(ack).build());
+            builder.setMsg(ServerProto.ServerMsg.newBuilder().setMsg(protocol.getMsg()).setServerId(serviceId).build());
         }
         else if (protocol.hasHeartbeat()) {
             builder.setHeartbeat(protocol.getHeartbeat());
@@ -41,6 +41,7 @@ public class ProtocolUtil {
      */
     public static ClientProto.CInner s2c(ServerProto.SInner proto) {
         ClientProto.CInner.Builder builder = ClientProto.CInner.newBuilder();
+        builder.setAck(proto.getAck());
         builder.setType(proto.getType());
         if (proto.hasMsg()) {
             builder.setMsg(proto.getMsg().getMsg());
@@ -61,7 +62,7 @@ public class ProtocolUtil {
      * @return a MessageLite Object that has same typed with lite parameter.
      */
     public static MessageLite newRegisterNotification(MessageLite lite, String sid) {
-        ClientProto.Notification notification = ClientProto.Notification.newBuilder().setCode(Constants.REPLY_PEER_REGISTER).setMsg(sid).build();
+        ClientProto.Notification notification = ClientProto.Notification.newBuilder().setCode(Constants.NotificationCode.REPLY_PEER_REGISTER).setMsg(sid).build();
         if (lite instanceof ServerProto.SInner) {
 
             ServerProto.SInner.Builder builder = ServerProto.SInner.newBuilder();
@@ -79,10 +80,31 @@ public class ProtocolUtil {
 
     /**
      * Return a new heartbeat object.
+     * @param messageLite type for return.
      * @return MessageLite
      */
-    public static MessageLite newHeartbeat() {
-        return ClientProto.Heartbeat.newBuilder().setData(ByteString.empty()).build();
+    public static MessageLite newHeartbeat(MessageLite messageLite) {
+        ClientProto.Heartbeat heartbeat = ClientProto.Heartbeat.newBuilder().setData(ByteString.empty()).build();
+        if (messageLite instanceof ClientProto.CInner) {
+            return ClientProto.CInner.newBuilder().setType(ClientProto.DataType.HEARTBEAT).setAck(0).setHeartbeat(heartbeat).build();
+        } else if (messageLite instanceof ServerProto.SInner){
+            return ServerProto.SInner.newBuilder().setType(ClientProto.DataType.HEARTBEAT).setAck(0).setHeartbeat(heartbeat).build();
+        }
+        return null;
     }
 
+    /**
+     * Return a new notification
+     * @param ack user's ack
+     * @param code return code
+     * @param msg message
+     * @return Notification
+     */
+    public static MessageLite newUserNotification(long ack, int code, String msg) {
+        ClientProto.CInner.Builder builder = ClientProto.CInner.newBuilder();
+        builder.setType(ClientProto.DataType.NOTIFICATION);
+        builder.setAck(ack);
+        builder.setNotification(ClientProto.Notification.newBuilder().setCode(code).setMsg(msg).build());
+        return builder.build();
+    }
 }

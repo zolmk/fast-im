@@ -40,7 +40,6 @@ public abstract class Dispatcher<T> implements Closeable, Runnable {
             try {
                 T protocol = this.queue.poll(1000, TimeUnit.MILLISECONDS);
                 if (protocol == null) {
-                    LOG.debug("protocol is null.");
                     continue;
                 }
                 oneLoop(protocol);
