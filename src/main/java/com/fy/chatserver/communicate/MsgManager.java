@@ -621,11 +621,13 @@ public class MsgManager implements Closeable, Constants {
 
                     ClientProto.GroupCreateData createData = groupOp.getCreteData();
                     String gid = self.groupFinder.create(createData.getUid(), createData.getIsPublish());
+                    int code = GroupOpCode.CREATE;
                     if (gid == null) {
                         gid = "";
+                        code = -1;
                     }
                     // write the notification
-                    ctx.writeAndFlush(ProtocolUtil.newUserNotification(inner.getAck(), GroupOpCode.CREATE, gid));
+                    ctx.writeAndFlush(ProtocolUtil.newUserNotification(inner.getAck(), code, gid));
                 }break;
                 case GroupOpCode.JOIN: {
                     LOG.debug("join a group. {}", inner);
@@ -645,7 +647,8 @@ public class MsgManager implements Closeable, Constants {
                     ClientProto.GroupUpdateData updateData = groupOp.getUpdateData();
                     boolean dissolve = self.groupFinder.dissolve(updateData.getUid(), updateData.getGid());
                     String msg = dissolve ? "success" : "fail";
-                    ctx.writeAndFlush(ProtocolUtil.newUserNotification(inner.getAck(), GroupOpCode.DISSOLVE, msg));
+                    int code = dissolve ? GroupOpCode.DISSOLVE : -1;
+                    ctx.writeAndFlush(ProtocolUtil.newUserNotification(inner.getAck(), code, msg));
                 }break;
                 case GroupOpCode.QUIT: {
                     LOG.debug("quit a group. {}", inner);
@@ -653,7 +656,8 @@ public class MsgManager implements Closeable, Constants {
                     ClientProto.GroupUpdateData updateData = groupOp.getUpdateData();
                     boolean quit = self.groupFinder.quit(updateData.getUid(), updateData.getGid());
                     String msg = quit ? "success" : "fail";
-                    ctx.writeAndFlush(ProtocolUtil.newUserNotification(inner.getAck(), GroupOpCode.DISSOLVE, msg));
+                    int code = quit ? GroupOpCode.QUIT : -1;
+                    ctx.writeAndFlush(ProtocolUtil.newUserNotification(inner.getAck(), code, msg));
                 }break;
             }
 
