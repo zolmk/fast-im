@@ -73,6 +73,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>3.5.5</version>
+        </dependency>
+
     </dependencies>
 
 </project>
