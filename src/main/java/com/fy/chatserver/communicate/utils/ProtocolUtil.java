@@ -3,8 +3,15 @@ package com.fy.chatserver.communicate.utils;
 import com.fy.chatserver.communicate.Constants;
 import com.fy.chatserver.communicate.proto.ClientProto;
 import com.fy.chatserver.communicate.proto.ServerProto;
+import com.fy.chatserver.persistent.entity.UnreadEntity;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.MessageLite;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * utils for Protobuf
@@ -106,5 +113,21 @@ public class ProtocolUtil {
         builder.setAck(ack);
         builder.setNotification(ClientProto.Notification.newBuilder().setCode(code).setMsg(msg).build());
         return builder.build();
+    }
+
+    public static List<ClientProto.CInner> unread2Client(List<UnreadEntity> entities) {
+        return entities.stream().map(entity -> {
+             return ClientProto.CInner.newBuilder().setType(ClientProto.DataType.MSG)
+                     .setMsg(ClientProto.Msg.newBuilder()
+                             .setType(ClientProto.MsgType.forNumber(entity.getMsgType()))
+                             .setIsGroup(entity.isGroup())
+                             .setTo(entity.getToId())
+                             .setFrom(entity.getFromId())
+                             .setData(ByteString.copyFrom(entity.getData(), StandardCharsets.UTF_8))
+                             .setGid(entity.getGid())
+                             .setSuffix(entity.getSuffix())
+                             .setPrefix(entity.getPrefix())
+                             .build()).build();
+        }).collect(Collectors.toList());
     }
 }
