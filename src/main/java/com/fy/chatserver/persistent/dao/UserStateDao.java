@@ -1,6 +1,9 @@
 package com.fy.chatserver.persistent.dao;
 
 import com.fy.chatserver.persistent.entity.UserStateEntity;
+import org.apache.ibatis.annotations.Flush;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * 管理用户状态表
@@ -8,6 +11,7 @@ import com.fy.chatserver.persistent.entity.UserStateEntity;
  **/
 
 
+@Mapper
 public interface UserStateDao {
 
     /**
