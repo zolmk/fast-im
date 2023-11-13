@@ -33,7 +33,6 @@ public class ZkGroupFinder implements GroupFinder {
         String gid = UUID.fastUUID().toString();
         try {
             this.client.create().withMode(CreateMode.PERSISTENT).forPath(this.rootPath + "/" + gid, isPublish ? new byte[]{1}:new byte[]{0});
-
         } catch (Exception e) {
             LOG.error("create group occur error.", e);
             return "";

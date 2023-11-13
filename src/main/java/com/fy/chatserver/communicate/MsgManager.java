@@ -1,11 +1,14 @@
 package com.fy.chatserver.communicate;
 
 import cn.hutool.core.collection.ConcurrentHashSet;
+import com.fy.chatserver.cache.Cache;
+import com.fy.chatserver.cache.impl.RedisCacheImpl;
 import com.fy.chatserver.common.CircleSet;
 import com.fy.chatserver.common.CsThreadFactory;
 import com.fy.chatserver.common.Dispatcher;
 import com.fy.chatserver.common.SyncCircleSet;
 import com.fy.chatserver.communicate.config.*;
+import com.fy.chatserver.communicate.event.UserRegisterEvent;
 import com.fy.chatserver.communicate.proto.ClientProto;
 import com.fy.chatserver.communicate.proto.ServerProto;
 import com.fy.chatserver.communicate.utils.LoaderUtil;
@@ -13,6 +16,10 @@ import com.fy.chatserver.communicate.utils.ProtocolUtil;
 import com.fy.chatserver.discovery.GroupFinder;
 import com.fy.chatserver.discovery.ServiceFinder;
 import com.fy.chatserver.discovery.ServiceProvider;
+import com.fy.chatserver.persistent.dao.UnreadDao;
+import com.fy.chatserver.persistent.dao.UserStateDao;
+import com.fy.chatserver.persistent.entity.UnreadEntity;
+import com.fy.chatserver.persistent.entity.UserStateEntity;
 import com.google.protobuf.MessageLite;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
@@ -28,10 +35,7 @@ import javax.annotation.Nonnull;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -63,11 +67,16 @@ public class MsgManager implements Closeable, Constants {
 
         this.userChannelGroupOpHandler = new UserChannelGroupOpHandler();
 
+        this.userRegisterEventHandler = new UserRegisterEventHandler();
+
+        this.cache = new RedisCacheImpl(properties);
+
         AcceptorConfig userAcceptorConfig = new UserAcceptorConfig(
                 UserChannelNotificationHandler::new,
                 ()->this.userChannelMsgHandler,
                 ()->this.userUnifiedHeartbeatHandler,
-                ()->this.userChannelGroupOpHandler);
+                ()->this.userChannelGroupOpHandler,
+                ()->this.userRegisterEventHandler);
 
         userAcceptorConfig.load(properties);
 
@@ -96,6 +105,8 @@ public class MsgManager implements Closeable, Constants {
         provider = (ServiceProvider) LoaderUtil.load(groupFinderProviderClass, "chat-server.group-finder.provider");
         this.groupFinder = (GroupFinder) provider.newInstance(properties);
 
+        // 执行数据库更新或者更新缓存的线程池
+        this.executor = new ThreadPoolExecutor(5, 20, 5000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(128), CsThreadFactory.getInstance());
     }
 
     private final static Logger LOG = LoggerFactory.getLogger(MsgManager.class);
@@ -140,7 +151,15 @@ public class MsgManager implements Closeable, Constants {
     // shared
     private final UserChannelGroupOpHandler userChannelGroupOpHandler;
 
+    // shared
+    private final UserRegisterEventHandler userRegisterEventHandler;
 
+    private UnreadDao unreadDao;
+    private UserStateDao userStateDao;
+
+    private Cache cache;
+
+    private final ThreadPoolExecutor executor;
 
     public void start() throws InterruptedException {
         this.userAccepter.start();
@@ -193,6 +212,7 @@ public class MsgManager implements Closeable, Constants {
         serviceFinder.close();
         this.userAccepter.close();
         this.remoteAccepter.close();
+        this.executor.shutdownNow();
     }
 
     private void closeAll(Iterator<? extends Closeable> iterator) throws IOException {
@@ -547,8 +567,8 @@ public class MsgManager implements Closeable, Constants {
             if (notification.getCode() == NotificationCode.REPLY_PEER_REGISTER && !this.isRegister) {
                 // register the channel
                 this.clientId = notification.getMsg();;
-                self.userStateSupervisor.login(this.clientId, ctx.channel());
                 this.isRegister = true;
+                ctx.fireUserEventTriggered(new UserRegisterEvent(this.clientId, ctx.channel()));
             }
         }
 
@@ -577,6 +597,54 @@ public class MsgManager implements Closeable, Constants {
             return String.format("user-channel-notification-handler-%s", this.clientId);
         }
     }
+
+    @ChannelHandler.Sharable
+    class UserRegisterEventHandler extends ChannelInboundHandlerAdapter implements NamedChannelHandler {
+
+        private final MsgManager self = MsgManager.this;
+        @Override
+        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+            if (evt instanceof UserRegisterEvent) {
+                UserRegisterEvent event = (UserRegisterEvent) evt;
+                final String uid = event.getUid();
+                final Channel channel = event.getChannel();
+                // 注册自身信息
+                self.userStateSupervisor.login(uid, ctx.channel());
+                // 更新用户状态
+                self.executor.submit(() -> {
+                    UserStateEntity userStateEntity = new UserStateEntity();
+                    userStateEntity.setOnline(true);
+                    userStateEntity.setUid(uid);
+                    userStateEntity.setLastDt(new Date());
+                    self.userStateDao.addIfAbsent(userStateEntity);
+                    // 更新缓存
+                    self.cache.setVal("online-state-" + uid, "online");
+                    // 检查是否有未读消息，这一步需要在更新状态完成后再执行
+                    self.executor.submit(() -> {
+                        List<UnreadEntity> andSwap = self.unreadDao.getAndSwap(uid);
+                        if (andSwap == null || andSwap.size() == 0) {
+                            return;
+                        }
+                        List<ClientProto.CInner> cInners = ProtocolUtil.unread2Client(andSwap);
+                        for (ClientProto.CInner cInner : cInners) {
+                            channel.writeAndFlush(cInner);
+                        }
+                    });
+
+                });
+
+            } else {
+                super.userEventTriggered(ctx, evt);
+            }
+        }
+
+        @Override
+        public String name() {
+            return "user-register-event-handler-shared";
+        }
+    }
+
+
 
     @ChannelHandler.Sharable
     class UserChannelMsgHandler extends ChannelInboundHandlerAdapter implements NamedChannelHandler {
