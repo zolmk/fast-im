@@ -1,0 +1,15 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.fy.chatserver.persistent.dao.UnreadDao">
+    <insert id="save" parameterType="unreadEntity">
+
+    </insert>
+    <select id="getAndSwap" resultType="unreadEntity" parameterType="string">
+        select * from unread
+    </select>
+    <select id="exists" resultType="boolean">
+        
+    </select>
+</mapper>

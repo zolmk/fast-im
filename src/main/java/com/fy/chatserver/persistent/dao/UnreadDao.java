@@ -1,6 +1,7 @@
 package com.fy.chatserver.persistent.dao;
 
 import com.fy.chatserver.persistent.entity.UnreadEntity;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
@@ -8,6 +9,7 @@ import java.util.List;
  * 管理用户未读消息表
  * @author zolmk
  */
+@Mapper
 public interface UnreadDao {
 
     /**
@@ -27,6 +29,6 @@ public interface UnreadDao {
      * 判断用户是否存在未读消息
      * @param uid 用户id
      */
-    void exists(String uid);
+    boolean exists(String uid);
 
 }

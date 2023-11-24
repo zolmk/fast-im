@@ -24,3 +24,7 @@ begin
 end if;
 end;
 
+create if not exists table unread(
+
+)
+
