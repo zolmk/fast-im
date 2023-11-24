@@ -3,11 +3,11 @@
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.fy.chatserver.persistent.dao.UserStateDao">
-    <select id="addIfAbsent" parameterType="com.fy.chatserver.persistent.entity.UserStateEntity" statementType="CALLABLE" resultType="map">
+    <select id="addIfAbsent" parameterType="userStateEntity" statementType="CALLABLE" resultType="map">
         {call proc_add_if_absent(#{uid, jdbcType=VARCHAR,mode=IN}, #{online, jdbcType=TINYINT, mode=IN}, #{lastDt, jdbcType=TIMESTAMP, mode=IN})}
     </select>
 
-    <select id="get" parameterType="java.lang.String" resultType="com.fy.chatserver.persistent.entity.UserStateEntity">
+    <select id="get" parameterType="java.lang.String" resultType="userStateEntity">
         select * from user_state where uid=#{uid}
     </select>
 
