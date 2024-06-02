@@ -1,4 +1,4 @@
-import com.fy.chatserver.communicate.proto.ClientProto;
+import com.feiyu.msgserver.communicate.proto.ClientProto;
 import org.junit.Test;
 
 /**
