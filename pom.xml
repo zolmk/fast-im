@@ -4,9 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.fy</groupId>
-    <artifactId>chat-server</artifactId>
+    <groupId>com.feiyu</groupId>
+    <artifactId>fast-im</artifactId>
+    <packaging>pom</packaging>
     <version>1.0</version>
+    <modules>
+        <module>route</module>
+        <module>storage</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

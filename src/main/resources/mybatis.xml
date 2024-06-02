@@ -10,8 +10,8 @@
         <setting name="mapUnderscoreToCamelCase" value="true"/>
     </settings>
     <typeAliases>
-        <typeAlias type="com.fy.chatserver.persistent.entity.UserStateEntity" alias="userStateEntity"/>
-        <typeAlias type="com.fy.chatserver.persistent.entity.UnreadEntity" alias="unreadEntity"/>
+        <typeAlias type="com.feiyu.msgserver.persistent.entity.UserStateEntity" alias="userStateEntity"/>
+        <typeAlias type="com.feiyu.msgserver.persistent.entity.UnreadEntity" alias="unreadEntity"/>
     </typeAliases>
 
     <environments default="development">

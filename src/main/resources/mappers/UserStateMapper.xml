@@ -2,7 +2,7 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.fy.chatserver.persistent.dao.UserStateDao">
+<mapper namespace="com.feiyu.msgserver.persistent.dao.UserStateDao">
     <select id="addIfAbsent" parameterType="userStateEntity" statementType="CALLABLE" resultType="map">
         {call proc_add_if_absent(#{uid, jdbcType=VARCHAR,mode=IN}, #{online, jdbcType=TINYINT, mode=IN}, #{lastDt, jdbcType=TIMESTAMP, mode=IN})}
     </select>
