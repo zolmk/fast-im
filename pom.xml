@@ -14,8 +14,9 @@
         <module>connector</module>
         <module>core</module>
         <module>common</module>
-        <module>zk-route</module>
         <module>dependencies</module>
+        <module>zk-route</module>
+        <module>ulsequence</module>
     </modules>
 
     <properties>

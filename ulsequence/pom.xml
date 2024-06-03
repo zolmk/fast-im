@@ -5,11 +5,11 @@
     <parent>
         <artifactId>fast-im</artifactId>
         <groupId>com.feiyu</groupId>
-        <version>${reversion}</version>
+        <version>1.0.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>zk-route</artifactId>
+    <artifactId>ulsequence</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -19,18 +19,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.curator</groupId>
-            <artifactId>curator-recipes</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
