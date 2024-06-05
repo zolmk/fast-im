@@ -2,6 +2,8 @@ package com.feiyu.ulsequence;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.Properties;
 import java.util.function.Function;
@@ -9,13 +11,19 @@ import java.util.function.Function;
 import static com.feiyu.ulsequence.Constants.*;
 
 @Getter
+@Configuration
 public class SequenceConfiguration {
     private Argument<Long> startUid;
     private Argument<Long> endUid;
     private Argument<Integer> growStep;
     private Argument<Integer> segmentSize;
     private Argument<Integer> segmentCnt;
-    private SequenceConfiguration() {}
+    public SequenceConfiguration() {}
+
+    @Bean
+    public Sequence<Long> sequence() {
+        return SequenceBuilder.build();
+    }
 
     public static SequenceConfiguration load(String nodeId, Properties properties) {
         Function<String, Long> longFunction = (Function<String, Long>) s -> Long.parseLong(properties.getProperty(s));

@@ -23,6 +23,7 @@
         <reversion>1.0.1</reversion>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <spring.version>2.6.7</spring.version>
     </properties>
 
     <dependencyManagement>
