@@ -22,9 +22,5 @@ begin
     else
         insert into user_state(`uid`, `online`, `last_dt`) value(u_uid, online, last_dt);
 end if;
-end;
-
-create if not exists table unread(
-
-)
+end
 
