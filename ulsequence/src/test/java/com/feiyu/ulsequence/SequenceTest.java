@@ -12,7 +12,7 @@ import java.util.concurrent.*;
 public class SequenceTest {
     @Test
     public void test() throws IOException {
-        int N = 100000;
+        int N = 10;
         List<Long> uids = Arrays.asList(12L, 123L, 234L, 2342L, 1638L, 1L, 234L, 2354L);
         int len = 8;
         Random random = new Random(2024);

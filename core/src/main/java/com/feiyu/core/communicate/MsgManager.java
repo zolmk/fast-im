@@ -33,7 +33,6 @@ import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -309,13 +308,13 @@ public class MsgManager implements Closeable, Constants {
             this.set = set;
         }
         @Override
-        public V put(@Nonnull K key,@Nonnull V value) {
+        public V put(K key, V value) {
             this.set.add(key);
             return super.put(key, value);
         }
 
         @Override
-        public V remove(@Nonnull Object key) {
+        public V remove(Object key) {
             this.set.remove(key);
             return super.remove(key);
         }
