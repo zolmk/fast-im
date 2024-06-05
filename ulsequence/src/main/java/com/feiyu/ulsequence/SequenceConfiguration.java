@@ -13,7 +13,6 @@ public class SequenceConfiguration {
     private Argument<Long> startUid;
     private Argument<Long> endUid;
     private Argument<Integer> growStep;
-    private Argument<Integer> startSegmentNumber;
     private Argument<Integer> segmentSize;
     private Argument<Integer> segmentCnt;
     private SequenceConfiguration() {}
@@ -26,7 +25,6 @@ public class SequenceConfiguration {
         config.startUid = build(longFunction, SERVICE_PREFIX + DOT + nodeId + ".start-uid");
         config.endUid = build(longFunction, SERVICE_PREFIX + DOT + nodeId + ".end-uid");
         config.growStep = build(intFunction, SERVICE_PREFIX + DOT + nodeId + ".grow-step");
-        config.startSegmentNumber = build(intFunction, SERVICE_PREFIX + DOT + nodeId + ".start-segment-number");
         config.segmentSize = build(intFunction, SERVICE_PREFIX + DOT + nodeId + ".segment-size");
         checkValue(config);
         config.segmentCnt = new Argument<>((int) ((config.endUid.val - config.startUid.val + 1) / config.segmentSize.val), "segment_cnt");
