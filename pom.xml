@@ -7,7 +7,7 @@
     <groupId>com.feiyu</groupId>
     <artifactId>fast-im</artifactId>
     <packaging>pom</packaging>
-    <version>${reversion}</version>
+    <version>1.0.1</version>
     <modules>
         <module>route</module>
         <module>storage</module>
@@ -17,6 +17,7 @@
         <module>dependencies</module>
         <module>zk-route</module>
         <module>ulsequence</module>
+        <module>interfaces</module>
     </modules>
 
     <properties>
@@ -36,6 +37,7 @@
                 <scope>import</scope>
             </dependency>
         </dependencies>
+
     </dependencyManagement>
 
 </project>
