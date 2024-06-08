@@ -1,21 +1,25 @@
 package com.feiyu.route;
 
+import com.feiyu.common.UserEventSubscriber;
 import java.util.List;
+import java.util.Optional;
+
+
 /**
  * post office
  * @param <MSG> 消息的类型
  * @param <UID> 用户ID的类型
  * @param <N> 通知的类型
+ * @param <CH> IO通道的类型
  */
-
-public interface PostOffice <MSG, UID, N> {
+public interface PostOffice <MSG, UID, N, CH> extends UserEventSubscriber<UID, CH> {
 
     /**
      * 查询用户下一个可用的消息序列号
      * @param uid 用户ID
      * @return 消息序列号
      */
-    Long nextMsgSeq(UID uid);
+    Optional<Long> nextMsgSeq(UID uid);
 
     /**
      * 获取用户1和用户2的离线或者历史消息

@@ -1,11 +1,10 @@
 server:
-  port: 8080
-
-
+  port: 8081
 
 dubbo:
   application:
-    name: ul-sequence
+    name: zk-route
+    qos-port: 33333
   protocol:
     name: dubbo
     port: -1

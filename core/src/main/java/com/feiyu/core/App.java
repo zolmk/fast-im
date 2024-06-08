@@ -16,7 +16,7 @@ public class App {
     public static void main(String[] args) throws IOException {
         Properties properties = new Properties();
         MsgManager msgManager = null;
-        try (InputStream inputStream = Files.newInputStream(Paths.get("./src/main/resources/application.properties"))) {
+        try (InputStream inputStream = App.class.getClassLoader().getResourceAsStream("application.properties")) {
             properties.load(inputStream);
 
             msgManager = new MsgManager(properties);
