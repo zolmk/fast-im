@@ -3,6 +3,8 @@ package com.feiyu.common;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * web项目中的返回结果类
  * @author zhufeifei 2024/6/5
@@ -10,7 +12,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class Result <T>{
+public class Result <T> implements Serializable {
     private int code;
     private T data;
 }
