@@ -1,9 +1,9 @@
 package com.feiyu.ulsequence;
 
-import java.util.Properties;
 
 /**
  * user-level seq 发号系统
+ * @author Zhuff
  * @param <UID>
  */
 public interface Sequence<UID> {
@@ -14,6 +14,11 @@ public interface Sequence<UID> {
      */
     Long nexSeq(UID uid);
 
+    /**
+     * 根据配置信息获取 Sequence 实例
+     * @param cfg config
+     * @return Sequence
+     */
     static Sequence<Long> getInstance(SequenceConfiguration cfg) {
         return new DefaultSequenceImpl(cfg);
     }

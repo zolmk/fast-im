@@ -2,8 +2,14 @@ package com.feiyu.ulsequence;
 
 /**
  * 实现分号段共享存储
+ * @author Zhuff
  */
 public interface Section <T>{
+    /**
+     * 当前Setion是否包含给定用户
+     * @param uid 用户ID
+     * @return boolean
+     */
     boolean has(T uid);
 
     /**
@@ -40,6 +46,7 @@ public interface Section <T>{
     /**
      * 尝试增大允许分配的最大序列号
      * 如果需要增大一般为当前最大序列号 + step，注意这里需要持久化
+     * @param seq 当前序列号
      */
     void grow(long seq);
 

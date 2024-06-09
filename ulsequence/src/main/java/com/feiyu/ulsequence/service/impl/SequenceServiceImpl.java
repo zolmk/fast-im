@@ -8,6 +8,7 @@ import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.stereotype.Component;
 
 /**
+ * 序列号发号服务实现类
  * @author zhufeifei 2024/6/6
  **/
 @Component
