@@ -47,7 +47,9 @@ public class DefaultSectionImpl implements Section<Long>{
 
     @Override
     public long nextSeq(Long uid) {
-        assert uid >= this.firstUid && uid <= this.lastUid;
+        if (!has(uid)) {
+            return -1;
+        }
         long seq = this.slots.getAndIncrement((int)(uid - this.firstUid));
         grow(seq);
         return seq;

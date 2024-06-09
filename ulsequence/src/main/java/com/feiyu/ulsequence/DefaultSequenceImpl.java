@@ -41,6 +41,9 @@ public final class DefaultSequenceImpl implements Sequence<Long>{
 
     @Override
     public Long nexSeq(Long uid) {
+        if (this.cfg.getStartUid().getVal() > uid || this.cfg.getEndUid().getVal() < uid) {
+            return -1L;
+        }
         return sections[pos(uid)].nextSeq(uid);
     }
 
