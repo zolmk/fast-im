@@ -3,6 +3,10 @@ package com.feiyu.ulsequence;
 import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * 默认号段实现
+ * @author Zhuff
+ */
 public class DefaultSectionImpl implements Section<Long>{
     private final AtomicLongArray slots;
     private final Long firstUid, lastUid;

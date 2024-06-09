@@ -1,7 +1,14 @@
 server:
   port: 8080
-
-
+ul-sequence:
+  node-id: node-1
+  start-uid: 1
+  end-uid: 16384
+  grow-step: 100
+  segment-size: 1024
+spring:
+  profiles:
+    active: dev
 
 dubbo:
   application:
@@ -11,8 +18,8 @@ dubbo:
     port: -1
   registry:
     id: zk-registry
-    address: zookeeper://111.230.15.9:2181
+    address: zookeeper://xxxx:2181
   config-center:
-    address: zookeeper://111.230.15.9:2181
+    address: zookeeper://xxxx:2181
   metadata-report:
-    address: zookeeper://111.230.15.9:2181
+    address: zookeeper://xxxx:2181

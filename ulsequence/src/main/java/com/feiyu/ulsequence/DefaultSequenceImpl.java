@@ -2,10 +2,10 @@ package com.feiyu.ulsequence;
 
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * singleton
+ * @author Zhuff
  */
 public final class DefaultSequenceImpl implements Sequence<Long>{
 
