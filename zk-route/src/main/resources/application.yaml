@@ -1,17 +1,5 @@
 server:
   port: 8081
-
-dubbo:
-  application:
-    name: zk-route
-    qos-port: 33333
-  protocol:
-    name: dubbo
-    port: -1
-  registry:
-    id: zk-registry
-    address: zookeeper://111.230.15.9:2181
-  config-center:
-    address: zookeeper://111.230.15.9:2181
-  metadata-report:
-    address: zookeeper://111.230.15.9:2181
+spring:
+  profiles:
+    active: dev
