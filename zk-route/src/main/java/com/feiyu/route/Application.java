@@ -10,6 +10,9 @@ import org.springframework.boot.SpringApplicationRunListener;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Component;
 
+/**
+ * @author Zhuff
+ */
 @SpringBootApplication
 @EnableDubbo
 public class Application implements SpringApplicationRunListener {
@@ -24,6 +27,5 @@ class Test implements CommandLineRunner {
     private ISequenceService sequenceService;
     @Override
     public void run(String... args) throws Exception {
-        System.out.println(sequenceService.gen(123L));
     }
 }
