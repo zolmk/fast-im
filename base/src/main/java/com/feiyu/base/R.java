@@ -1,4 +1,4 @@
-package com.feiyu.common;
+package com.feiyu.base;
 
 /**
  * @author zhufeifei 2024/6/6
