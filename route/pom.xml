@@ -20,7 +20,7 @@
     <dependencies>
         <dependency>
             <groupId>com.feiyu</groupId>
-            <artifactId>common</artifactId>
+            <artifactId>base</artifactId>
             <version>${reversion}</version>
         </dependency>
     </dependencies>

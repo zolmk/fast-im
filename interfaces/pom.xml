@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>com.feiyu</groupId>
-            <artifactId>common</artifactId>
+            <artifactId>base</artifactId>
             <version>1.0.1</version>
         </dependency>
     </dependencies>

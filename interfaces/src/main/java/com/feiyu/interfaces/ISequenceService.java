@@ -1,7 +1,7 @@
 package com.feiyu.interfaces;
 
 
-import com.feiyu.common.Result;
+import com.feiyu.base.Result;
 
 /**
  * @author zhufeifei 2024/6/6

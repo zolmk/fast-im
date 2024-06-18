@@ -1,7 +1,7 @@
 package com.feiyu.ulsequence.service.impl;
 
-import com.feiyu.common.R;
-import com.feiyu.common.Result;
+import com.feiyu.base.R;
+import com.feiyu.base.Result;
 import com.feiyu.interfaces.ISequenceService;
 import com.feiyu.ulsequence.Sequence;
 import org.apache.dubbo.config.annotation.DubboService;

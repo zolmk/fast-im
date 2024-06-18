@@ -13,10 +13,10 @@
         <module>storage</module>
         <module>connector</module>
         <module>core</module>
-        <module>common</module>
+        <module>base</module>
         <module>dependencies</module>
         <module>zk-route</module>
-        <module>ulsequence</module>
+        <module>ul-sequence</module>
         <module>interfaces</module>
     </modules>
 

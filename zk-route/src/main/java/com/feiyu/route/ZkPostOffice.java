@@ -1,8 +1,9 @@
 package com.feiyu.route;
 
-import com.feiyu.common.FastImThreadFactory;
-import com.feiyu.common.R;
-import com.feiyu.common.Result;
+import com.feiyu.base.FastImThreadFactory;
+import com.feiyu.base.R;
+import com.feiyu.base.Result;
+import com.feiyu.base.UserEventPublisher;
 import com.feiyu.interfaces.ISequenceService;
 import com.google.protobuf.MessageLite;
 import io.netty.bootstrap.Bootstrap;
@@ -13,19 +14,18 @@ import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 import lombok.Setter;
 import lombok.extern.java.Log;
-import org.apache.catalina.Pipeline;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.stereotype.Component;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /**
  *
@@ -34,7 +34,7 @@ import java.util.function.Function;
 
 @Component
 @Log
-public class ZkPostOffice implements PostOffice<MessageLite, Long, MessageLite, Channel>{
+public class ZkPostOffice implements PostOffice<MessageLite, Long, MessageLite, Channel>, Closeable {
     @DubboReference
     private ISequenceService sequenceService;
 
@@ -50,6 +50,10 @@ public class ZkPostOffice implements PostOffice<MessageLite, Long, MessageLite, 
 
     private final ThreadPoolExecutor mainExecutor;
 
+    private UserEventPublisher<Long, Channel> userEventPublisher;
+
+    private int subscriberId = -1;
+
     public ZkPostOffice(ServiceFinder serviceFinder) {
         this.serviceFinder = serviceFinder;
         this.map = new ConcurrentHashMap<>();
@@ -59,6 +63,12 @@ public class ZkPostOffice implements PostOffice<MessageLite, Long, MessageLite, 
         this.mainExecutor = new ThreadPoolExecutor(2, 3, 10, TimeUnit.SECONDS, new ArrayBlockingQueue<>(10), threadFactory, new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
+
+    @Override
+    public void register(UserEventPublisher<Long, Channel> publisher) {
+        this.userEventPublisher = publisher;
+        publisher.add(this);
+    }
 
     @Override
     public void login(Long aLong, Channel channel) {
@@ -163,6 +173,14 @@ public class ZkPostOffice implements PostOffice<MessageLite, Long, MessageLite, 
             }
         }
     };
+
+    @Override
+    public void close() throws IOException {
+        int sid = this.subscriberId;
+        if (sid != -1) {
+            this.userEventPublisher.remove(sid);
+        }
+    }
 
 
     /**

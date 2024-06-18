@@ -1,4 +1,4 @@
-package com.feiyu.common;
+package com.feiyu.base;
 
 import lombok.Data;
 
