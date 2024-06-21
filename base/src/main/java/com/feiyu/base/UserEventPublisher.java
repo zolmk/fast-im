@@ -5,7 +5,7 @@ package com.feiyu.base;
  *
  * @author feiyu
  */
-public interface UserEventPublisher <UID, CH> {
+public interface UserEventPublisher<UID, CH> {
   /**
    * 添加用户订阅事件.
    *
