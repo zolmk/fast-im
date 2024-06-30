@@ -12,13 +12,14 @@ public final class ProtoUtil {
   /**
    * 获取心跳包.
    *
-   * @param bytes 心跳包可能会携带的数据
+   * @param type 心跳包类型 Ping Pong
+   * @param data 心跳包可能会携带的数据
    * @return 心跳包
    */
-  public static MessageLite heartbeat(byte[] bytes) {
+  public static MessageLite heartbeat(Messages.HeartbeatType type, byte[] data) {
     Messages.Msg.Builder builder = Messages.Msg.newBuilder();
     builder.setType(Messages.MsgType.HEARTBEAT);
-    builder.setEmpty(bytes.length == 0 ? ByteString.EMPTY : ByteString.copyFrom(bytes));
+    builder.setHeartbeatMsg(Messages.HeartbeatMsg.newBuilder().setType(type).setData(ByteString.copyFrom(data)).build());
     return builder.build();
   }
 }

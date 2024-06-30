@@ -1,5 +1,6 @@
 package com.feiyu.connector.handlers;
 
+import com.feiyu.base.proto.Messages;
 import com.google.protobuf.MessageLite;
 import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import java.lang.reflect.InvocationTargetException;
