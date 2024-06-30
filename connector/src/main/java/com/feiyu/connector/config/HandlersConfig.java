@@ -1,5 +1,6 @@
 package com.feiyu.connector.config;
 
+import com.feiyu.connector.handlers.BaseHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
 
@@ -44,6 +45,7 @@ public class HandlersConfig {
           constructor = c.getConstructor();
           hasParams = false;
         }
+        // is shared
         if (c.isAnnotationPresent(ChannelHandler.Sharable.class)) {
           Object o = null;
           if (hasParams) {
@@ -85,7 +87,12 @@ public class HandlersConfig {
 
   public static void initPipeline(ChannelPipeline pipeline) {
     for (Supplier<ChannelHandler> handlerSupplier : CLIENT_HANDLERS) {
-      pipeline.addLast(handlerSupplier.get());
+      ChannelHandler channelHandler = handlerSupplier.get();
+      if (channelHandler instanceof BaseHandler) {
+        pipeline.addLast(((BaseHandler) channelHandler).name(), channelHandler);
+      } else {
+        pipeline.addLast(channelHandler);
+      }
     }
   }
 }

@@ -15,8 +15,8 @@ message Msg {
     QueryMsg queryMsg=4;
     /** 控制 */
     ControlMsg controlMsg=5;
-    /** 占位 */
-    bytes empty=7;
+    /** 心跳 */
+    HeartbeatMsg heartbeatMsg=6;
   }
 }
 /**
@@ -115,4 +115,14 @@ message ClientInfo {
   int64 uid=1;              // 用户ID
   string dvcName=2;         // 设备名称
   string dvcSerialNumber=3; // 设备序列号
+}
+
+message HeartbeatMsg {
+  HeartbeatType type=1;
+  bytes data=2;
+}
+
+enum HeartbeatType {
+  PING=0;
+  PONG=1;
 }
