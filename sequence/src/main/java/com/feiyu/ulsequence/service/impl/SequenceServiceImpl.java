@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  * @author zhufeifei 2024/6/6
  **/
 @Component
-@DubboService
+@DubboService(loadbalance = "consistenthash")
 public class SequenceServiceImpl implements ISequenceService {
 
     private final Sequence<Long> sequence;
