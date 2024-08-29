@@ -1,0 +1,91 @@
+package com.feiyu.connector.service;
+
+import com.feiyu.base.utils.NetUtil;
+import com.feiyu.connector.config.ZKConfig;
+import com.feiyu.connector.enums.ElectionState;
+import com.feiyu.connector.service.impl.CuratorElectionService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.curator.framework.recipes.cache.CuratorCache;
+import org.apache.curator.framework.recipes.cache.CuratorCacheListener;
+
+@Slf4j
+public abstract class ZooKeeperDistributionController extends DistributionController implements CuratorCacheListener {
+    private final ElectionService electionService;
+    protected final ZKConfig zkConfig;
+    private volatile boolean isLeader = false;
+    private CuratorCache curatorCache;
+
+    public ZooKeeperDistributionController(ZKConfig zkConfig) {
+        this.zkConfig = zkConfig;
+        this.electionService = new CuratorElectionService(NetUtil.getAddress(), zkConfig.getElectionPath(), zkConfig.curatorFramework(), new ElectionStateListener() {
+            @Override
+            public void change(ElectionState state) {
+                switch (state) {
+                    case READY:break;
+                    case LEADER: {
+                        if (!isLeader) {
+                            isLeader = true;
+                            // 强制成功
+                            while (true) {
+                                try {
+                                    subscribeWorker();
+                                    break;
+                                } catch (Exception e) {
+                                    log.error("ZooKeeperDistributionController occur error while subscribe worker.", e);
+                                }
+                                try {
+                                    describeWorker();
+                                } catch (Exception ignore) {
+                                }
+                            }
+                        }
+                    } break;
+                    case FOLLOWER: {
+                        if (isLeader) {
+                            isLeader = false;
+                            try {
+                                describeWorker();
+                            } catch (Exception e) {
+                                log.error("ZooKeeperDistributionController occur error while describe worker.", e);
+                            }
+                        }
+                    }break;
+                }
+            }
+        });
+    }
+
+    @Override
+    public void subscribeWorker() {
+        log.info("Controller subscribe worker. path: {}", this.zkConfig.getWorkerPath());
+        curatorCache = CuratorCache.build(this.zkConfig.curatorFramework(), this.zkConfig.getWorkerPath());
+        curatorCache.listenable().addListener(this);
+    }
+
+    @Override
+    public void describeWorker() {
+        log.info("Controller describe worker.");
+        curatorCache.close();
+        curatorCache = null;
+    }
+
+    @Override
+    public void startElection() {
+        log.info("Starting election leader.");
+        try {
+            electionService.start();
+        } catch (Exception e) {
+            log.error("A error occurred while starting to elect leader. Error: {}", e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void destroyElection() {
+        log.info("Destroy election service.");
+        try {
+            electionService.destroy();
+        } catch (Exception e) {
+            log.error("A error occurred while destroy the ElectionService. Error: {}", e.getMessage(), e);
+        }
+    }
+}
