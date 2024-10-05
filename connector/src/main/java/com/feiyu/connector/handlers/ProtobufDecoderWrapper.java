@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 import java.util.Properties;
 
 /**
- * #{@link ProtobufDecoder}的包装类
+ * {@link ProtobufDecoder}的包装类
  *
  * @author Zhuff
  */
@@ -18,7 +18,7 @@ public class ProtobufDecoderWrapper extends ProtobufDecoder implements BaseHandl
   }
 
   /**
-   * 获取#{@link MessageLite}对象来完成ProtobufDecoder的初始化.
+   * 获取{@link MessageLite}对象来完成ProtobufDecoder的初始化.
    *
    * @param cname MessageLite对象的全类名
    * @return MessageLite
