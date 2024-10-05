@@ -7,6 +7,10 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.leader.LeaderLatch;
 import org.apache.curator.framework.recipes.leader.LeaderLatchListener;
 
+/**
+ * 基于Curator的领导选举实现
+ * @author zhufeifei
+ */
 public class CuratorElectionService implements ElectionService {
     private final LeaderLatch leaderLatch;
     private final ElectionStateListener electionStateListener;

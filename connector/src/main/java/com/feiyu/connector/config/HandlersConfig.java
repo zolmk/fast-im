@@ -1,6 +1,7 @@
 package com.feiyu.connector.config;
 
 import com.feiyu.connector.handlers.BaseHandler;
+import com.feiyu.connector.utils.HandlersFactory;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
 
@@ -34,53 +35,10 @@ public class HandlersConfig {
       "handlers.factories")))) {
       while (scanner.hasNext()) {
         String clName = scanner.nextLine();
-        Class<?> c = Class.forName(clName);
-        Supplier<ChannelHandler> supplier = null;
-        Constructor<?> constructor;
-        boolean hasParams;
-        try {
-          constructor = c.getConstructor(Properties.class);
-          hasParams = true;
-        } catch (NoSuchMethodException e) {
-          constructor = c.getConstructor();
-          hasParams = false;
-        }
-        // is shared
-        if (c.isAnnotationPresent(ChannelHandler.Sharable.class)) {
-          Object o = null;
-          if (hasParams) {
-            o = constructor.newInstance(HANDLERS_PROPERTIES);
-          } else {
-            o = constructor.newInstance();
-          }
-          Object finalO = o;
-          supplier = () -> (ChannelHandler) finalO;
-        } else {
-          Constructor<?> finalConstructor = constructor;
-          if (hasParams) {
-            supplier = () -> {
-              try {
-                return (ChannelHandler) finalConstructor.newInstance(HANDLERS_PROPERTIES);
-              } catch (InstantiationException | IllegalAccessException |
-                       InvocationTargetException e) {
-                throw new RuntimeException(e);
-              }
-            };
-          } else {
-            supplier = () -> {
-              try {
-                return (ChannelHandler) finalConstructor.newInstance();
-              } catch (InstantiationException | IllegalAccessException |
-                       InvocationTargetException e) {
-                throw new RuntimeException(e);
-              }
-            };
-          }
-        }
+        Supplier<ChannelHandler> supplier = HandlersFactory.create(clName, HANDLERS_PROPERTIES);
         CLIENT_HANDLERS.add(supplier);
       }
-    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
-             NoSuchMethodException | InvocationTargetException e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }

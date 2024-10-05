@@ -47,12 +47,13 @@ public class UnifiedHeartbeatHandler extends SimpleChannelInboundHandler<Message
       Messages.HeartbeatMsg heartbeatMsg = msg.getHeartbeatMsg();
       if (Messages.HeartbeatType.PONG.equals(heartbeatMsg.getType())) {
         if (!this.future.cancel(false)) {
-          // cancel failed.
+          // 如果是 PONG 包，并且取消任务失败，则重新构建一个HeartbeatCallback
           this.heartbeatCallback.destroy();
           this.heartbeatCallback = heartbeatCallbackSupplier.apply(ctx.channel());
         }
         this.heartbeatCallback.reset();
       } else {
+        // 如果是 PING 包，则回复 PONG
         ctx.writeAndFlush(ProtoUtil.heartbeat(Messages.HeartbeatType.PONG, new byte[0]));
       }
     }
@@ -62,6 +63,7 @@ public class UnifiedHeartbeatHandler extends SimpleChannelInboundHandler<Message
   public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
     if (evt instanceof IdleStateEvent) {
       if (IdleState.WRITER_IDLE.equals(((IdleStateEvent) evt).state())) {
+        // 写空闲超时，写 PING 包
         ctx.writeAndFlush(ProtoUtil.heartbeat(Messages.HeartbeatType.PING, new byte[0]));
         this.future = ctx.channel().eventLoop().schedule(this.heartbeatCallback, timeout, timeUnit);
       } else if (IdleState.READER_IDLE.equals(((IdleStateEvent) evt).state())) {
