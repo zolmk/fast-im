@@ -1,9 +1,9 @@
-package com.feiyu.connector.service;
+package com.feiyu.connector.service.impl;
 
-import com.feiyu.base.utils.NetUtil;
 import com.feiyu.connector.config.ZKConfig;
 import com.feiyu.connector.enums.ElectionState;
-import com.feiyu.connector.service.impl.CuratorElectionService;
+import com.feiyu.connector.service.ElectionService;
+import com.feiyu.connector.service.ElectionStateListener;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.recipes.cache.CuratorCache;
 import org.apache.curator.framework.recipes.cache.CuratorCacheListener;
@@ -15,9 +15,9 @@ public abstract class ZooKeeperDistributionController extends DistributionContro
     private volatile boolean isLeader = false;
     protected CuratorCache curatorCache;
 
-    public ZooKeeperDistributionController(ZKConfig zkConfig) {
+    public ZooKeeperDistributionController(String id, ZKConfig zkConfig) {
         this.zkConfig = zkConfig;
-        this.electionService = new CuratorElectionService(NetUtil.getAddress(), zkConfig.getElectionPath(), zkConfig.curatorFramework(), this);
+        this.electionService = new CuratorElectionService(id, zkConfig.getElectionPath(), zkConfig.curatorFramework(), this);
     }
 
     @Override
@@ -59,6 +59,7 @@ public abstract class ZooKeeperDistributionController extends DistributionContro
     public void subscribeWorker() {
         log.info("Controller subscribe worker. path: {}", this.zkConfig.getWorkerPath());
         curatorCache = CuratorCache.build(this.zkConfig.curatorFramework(), this.zkConfig.getWorkerPath());
+        curatorCache.start();
         curatorCache.listenable().addListener(this);
     }
 

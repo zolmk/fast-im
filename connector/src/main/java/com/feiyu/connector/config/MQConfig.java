@@ -9,6 +9,11 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
+
+/**
+ * 队列配置类
+ */
+
 @Setter
 @Getter
 @Configuration
