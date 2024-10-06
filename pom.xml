@@ -12,7 +12,7 @@
         <module>route</module>
         <module>storage</module>
         <module>connector</module>
-        <module>core</module>
+<!--        <module>core</module>-->
         <module>base</module>
         <module>dependencies</module>
         <module>zk-route</module>

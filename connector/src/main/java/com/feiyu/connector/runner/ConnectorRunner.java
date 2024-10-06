@@ -1,64 +1,85 @@
 package com.feiyu.connector.runner;
 
-import com.feiyu.connector.Application;
+import com.feiyu.connector.config.ConnectorConfig;
 import com.feiyu.connector.config.HandlersConfig;
+import com.feiyu.connector.service.ConnectorWorker;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioChannelOption;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.channel.unix.GenericUnixChannelOption;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+/**
+ * 连接器Runner
+ * 连接器核心类，创建Netty NioChannel的入口，负责管理客户端连接
+ */
+@Slf4j
+@Component
+public class ConnectorRunner implements ApplicationRunner, DisposableBean {
 
-public class ConnectorRunner implements ApplicationRunner {
+  private final ConnectorConfig connectorConfig;
+  private final ConnectorWorker connectorWorker;
 
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
-        Properties properties = new Properties();
-        try(InputStream is =
-                    Application.class.getClassLoader().getResourceAsStream("application.properties")) {
-            properties.load(is);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+  private EventLoopGroup bossGroup;
+  private EventLoopGroup workerGroup;
+  private Channel mainChannel;
+
+  public ConnectorRunner(ConnectorConfig connectorConfig, ConnectorWorker connectorWorker) {
+    this.connectorConfig = connectorConfig;
+    this.connectorWorker = connectorWorker;
+  }
+
+  @Override
+  public void run(ApplicationArguments args) throws Exception {
+    ServerBootstrap bootstrap = new ServerBootstrap();
+    bossGroup = new NioEventLoopGroup(connectorConfig.getBossCount());
+    workerGroup = new NioEventLoopGroup(connectorConfig.getWorkerCount());
+    bootstrap.group(bossGroup, workerGroup)
+      .channel(NioServerSocketChannel.class)
+      .handler(new LoggingHandler(LogLevel.DEBUG))
+
+      .option(ChannelOption.SO_BACKLOG, connectorConfig.getSoBacklog())
+      .option(ChannelOption.SO_REUSEADDR, true)
+
+      .childOption(ChannelOption.SO_KEEPALIVE, true)
+      .childOption(ChannelOption.TCP_NODELAY, true);
+    bootstrap.childHandler(new ChannelInitializer<NioSocketChannel>() {
+      @Override
+      protected void initChannel(NioSocketChannel channel) throws Exception {
+        HandlersConfig.initPipeline(channel.pipeline());
+      }
+    });
+    try {
+      ChannelFuture bindFuture = bootstrap.bind(connectorConfig.getAcceptPort());
+      bindFuture.addListener((ChannelFutureListener) channelFuture -> {
+        if (channelFuture.isSuccess()) {
+          log.info("port {} bind success.", connectorConfig.getAcceptPort());
+        } else {
+          log.error("port {} bind fail.", connectorConfig.getAcceptPort());
         }
-        int bossCnt = Integer.parseInt(properties.getProperty("server.boss-count"));
-        int workerCnt = Integer.parseInt(properties.getProperty("server.worker-count"));
-        int port = Integer.parseInt(properties.getProperty("server.port"));
-
-        ServerBootstrap bootstrap = new ServerBootstrap();
-        NioEventLoopGroup boss = new NioEventLoopGroup(bossCnt);
-        NioEventLoopGroup worker = new NioEventLoopGroup(workerCnt);
-        bootstrap.group(boss, worker)
-                .channel(NioServerSocketChannel.class)
-                .handler(new LoggingHandler(LogLevel.DEBUG))
-                .option(ChannelOption.SO_BACKLOG, 1000)
-                .option(GenericUnixChannelOption.SO_REUSEPORT, true)
-                .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .childOption(ChannelOption.TCP_NODELAY, true)
-                .childOption(ChannelOption.SO_REUSEADDR, true);
-        bootstrap.childHandler(new ChannelInitializer<NioSocketChannel>() {
-            @Override
-            protected void initChannel(NioSocketChannel channel) throws Exception {
-                HandlersConfig.initPipeline(channel.pipeline());
-            }
-        });
-        try {
-            ChannelFuture bind = bootstrap.bind(port);
-            bind.sync().channel().closeFuture().sync();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } finally {
-            boss.shutdownGracefully();
-            worker.shutdownGracefully();
-        }
+      });
+      mainChannel = bindFuture.sync().channel();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
     }
+
+    connectorWorker.start();
+  }
+
+  @Override
+  public void destroy() throws Exception {
+    if (mainChannel != null && mainChannel.isOpen()) {
+      mainChannel.close();
+    }
+    bossGroup.shutdownGracefully();
+    workerGroup.shutdownGracefully();
+  }
 }

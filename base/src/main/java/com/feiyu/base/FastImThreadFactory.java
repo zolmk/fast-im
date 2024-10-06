@@ -25,11 +25,11 @@ public class FastImThreadFactory implements ThreadFactory {
   public Thread newThread(@NonNull Runnable r) {
     Thread thread = new Thread(r);
     thread.setDaemon(this.isDaemon);
-    thread.setName(threadName());
+    thread.setName(name());
     return thread;
   }
 
-  private String threadName() {
+  private String name() {
     return String.format("%s - %d", this.usage, this.cnt.getAndIncrement());
   }
 }

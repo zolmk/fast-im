@@ -1,12 +1,10 @@
-package com.feiyu.connector.service;
+package com.feiyu.connector.service.impl;
 
 import com.feiyu.base.LifeCycle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public abstract class DistributionController implements LifeCycle {
-
-    private static final Logger log = LoggerFactory.getLogger(DistributionController.class);
 
     @Override
     public void start() throws Exception {

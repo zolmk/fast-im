@@ -3,10 +3,7 @@ package com.feiyu.connector.service.impl;
 import com.feiyu.connector.service.MQAllocator;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 范围分配器
@@ -33,5 +30,10 @@ public class RangeMQAllocator implements MQAllocator {
             i += bs;
         }
         return topicMap;
+    }
+
+    public static void main(String[] args) {
+        Map<String, List<String>> alloc = new RangeMQAllocator().alloc(Arrays.asList("1"), Arrays.asList("1", "2"));
+        System.out.println(alloc);
     }
 }
