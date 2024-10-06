@@ -9,50 +9,50 @@ import org.apache.curator.framework.recipes.cache.CuratorCache;
 import org.apache.curator.framework.recipes.cache.CuratorCacheListener;
 
 @Slf4j
-public abstract class ZooKeeperDistributionController extends DistributionController implements CuratorCacheListener {
+public abstract class ZooKeeperDistributionController extends DistributionController implements CuratorCacheListener, ElectionStateListener {
     private final ElectionService electionService;
     protected final ZKConfig zkConfig;
     private volatile boolean isLeader = false;
-    private CuratorCache curatorCache;
+    protected CuratorCache curatorCache;
 
     public ZooKeeperDistributionController(ZKConfig zkConfig) {
         this.zkConfig = zkConfig;
-        this.electionService = new CuratorElectionService(NetUtil.getAddress(), zkConfig.getElectionPath(), zkConfig.curatorFramework(), new ElectionStateListener() {
-            @Override
-            public void change(ElectionState state) {
-                switch (state) {
-                    case READY:break;
-                    case LEADER: {
-                        if (!isLeader) {
-                            isLeader = true;
-                            // 强制成功
-                            while (true) {
-                                try {
-                                    subscribeWorker();
-                                    break;
-                                } catch (Exception e) {
-                                    log.error("ZooKeeperDistributionController occur error while subscribe worker.", e);
-                                }
-                                try {
-                                    describeWorker();
-                                } catch (Exception ignore) {
-                                }
-                            }
+        this.electionService = new CuratorElectionService(NetUtil.getAddress(), zkConfig.getElectionPath(), zkConfig.curatorFramework(), this);
+    }
+
+    @Override
+    public void change(ElectionState state) {
+        switch (state) {
+            case READY:break;
+            case LEADER: {
+                if (!isLeader) {
+                    isLeader = true;
+                    // 强制成功
+                    while (true) {
+                        try {
+                            subscribeWorker();
+                            break;
+                        } catch (Exception e) {
+                            log.error("ZooKeeperDistributionController occur error while subscribe worker.", e);
                         }
-                    } break;
-                    case FOLLOWER: {
-                        if (isLeader) {
-                            isLeader = false;
-                            try {
-                                describeWorker();
-                            } catch (Exception e) {
-                                log.error("ZooKeeperDistributionController occur error while describe worker.", e);
-                            }
+                        try {
+                            describeWorker();
+                        } catch (Exception ignore) {
                         }
-                    }break;
+                    }
                 }
-            }
-        });
+            } break;
+            case FOLLOWER: {
+                if (isLeader) {
+                    isLeader = false;
+                    try {
+                        describeWorker();
+                    } catch (Exception e) {
+                        log.error("ZooKeeperDistributionController occur error while describe worker.", e);
+                    }
+                }
+            }break;
+        }
     }
 
     @Override
@@ -65,6 +65,7 @@ public abstract class ZooKeeperDistributionController extends DistributionContro
     @Override
     public void describeWorker() {
         log.info("Controller describe worker.");
+        curatorCache.listenable().removeListener(this);
         curatorCache.close();
         curatorCache = null;
     }
