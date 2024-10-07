@@ -1,5 +1,7 @@
 package com.feiyu.connector.service;
 
+import com.feiyu.base.Named;
+
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +10,6 @@ import java.util.Map;
  **/
 
 
-public interface MQAllocator {
+public interface MQAllocator extends Named {
     Map<String, List<String>> alloc(List<String> workers, List<String> topics);
 }
