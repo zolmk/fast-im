@@ -10,7 +10,7 @@ import java.util.*;
  * @author zhufeifei 2024/10/6
  **/
 
-@Component(value = "range")
+@Component(value = "rangeMQAllocator")
 public class RangeMQAllocator implements MQAllocator {
     /**
      * 范围分配，默认分配策略
@@ -35,5 +35,10 @@ public class RangeMQAllocator implements MQAllocator {
     public static void main(String[] args) {
         Map<String, List<String>> alloc = new RangeMQAllocator().alloc(Arrays.asList("1"), Arrays.asList("1", "2"));
         System.out.println(alloc);
+    }
+
+    @Override
+    public String name() {
+        return "range";
     }
 }

@@ -31,5 +31,7 @@ public class ConnectorConfig {
 
   private String mqMallocStrategy = "range";
 
+  private String messageReceiver = "kafka";
+
   private List<String> topicList = new ArrayList<>();
 }

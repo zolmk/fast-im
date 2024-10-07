@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.feiyu.connector.config.ConnectorConfig;
 import com.feiyu.connector.config.ZKConfig;
 import com.feiyu.connector.service.MQAllocator;
+import com.feiyu.connector.utils.NamedBeanProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.ChildData;
@@ -26,20 +27,20 @@ import java.util.stream.Collectors;
 
 @Component
 @Slf4j
-public class ConnectorDistributionController extends ZooKeeperDistributionController implements InitializingBean, ApplicationContextAware {
+public class ConnectorDistributionController extends ZooKeeperDistributionController implements ApplicationContextAware {
 
-  private Map<String, MQAllocator> allocatorMap;
   private ApplicationContext applicationContext;
   private final ConnectorConfig connectorConfig;
   private final JsonMapper jsonMapper;
   private final CuratorFramework client;
+  private final NamedBeanProvider namedBeanProvider;
 
-  public ConnectorDistributionController(ConnectorConfig connectorConfig, ZKConfig zkConfig, JsonMapper jsonMapper) {
+  public ConnectorDistributionController(ConnectorConfig connectorConfig, ZKConfig zkConfig, JsonMapper jsonMapper, NamedBeanProvider namedBeanProvider) {
     super(connectorConfig.getId(), zkConfig);
     this.jsonMapper = jsonMapper;
-    allocatorMap = new HashMap<>();
     this.connectorConfig = connectorConfig;
     this.client = zkConfig.curatorFramework();
+    this.namedBeanProvider = namedBeanProvider;
   }
 
   @Override
@@ -52,7 +53,8 @@ public class ConnectorDistributionController extends ZooKeeperDistributionContro
         // realloc queue
         // 分配队列给其他 Worker
         log.info("node create: {}", new String(data.getData()));
-        MQAllocator allocator = allocatorMap.get(connectorConfig.getMqMallocStrategy());
+        MQAllocator allocator = namedBeanProvider.matchPrefix(connectorConfig.getMqMallocStrategy(), MQAllocator.class);
+        log.info("mq allocator type : {}", allocator.name());
         Map<String, List<String>> range = allocator.alloc(workers(), connectorConfig.getTopicList());
         updateWorkerQueue(range);
       }
@@ -91,12 +93,6 @@ public class ConnectorDistributionController extends ZooKeeperDistributionContro
 
   private List<String> workers() {
     return curatorCache.stream().map(ChildData::getPath).filter(s->s.startsWith(zkConfig.getWorkerPath()+"/")).collect(Collectors.toList());
-  }
-
-  @Override
-  public void afterPropertiesSet() throws Exception {
-    Map<String, MQAllocator> beansOfType = this.applicationContext.getBeansOfType(MQAllocator.class);
-    this.allocatorMap.putAll(beansOfType);
   }
 
   @Override
