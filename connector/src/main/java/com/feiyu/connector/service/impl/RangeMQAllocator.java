@@ -1,6 +1,9 @@
 package com.feiyu.connector.service.impl;
 
 import com.feiyu.connector.service.MQAllocator;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.SearchStrategy;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -11,6 +14,7 @@ import java.util.*;
  **/
 
 @Component(value = "rangeMQAllocator")
+@ConditionalOnProperty(name = "connector.mq-allocator", havingValue = "range", matchIfMissing = true)
 public class RangeMQAllocator implements MQAllocator {
     /**
      * 范围分配，默认分配策略

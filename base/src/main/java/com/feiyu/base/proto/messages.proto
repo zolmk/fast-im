@@ -109,6 +109,7 @@ message ControlMsg {
 enum ControlType {
   MSG_DELIVERED_FAIL=0;
   CLIENT_LOGIN=1;
+  CONNECT_REST=2;
 }
 
 message ClientInfo {

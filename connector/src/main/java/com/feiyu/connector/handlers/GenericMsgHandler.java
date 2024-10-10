@@ -2,7 +2,6 @@ package com.feiyu.connector.handlers;
 
 import com.feiyu.base.proto.Messages;
 import com.feiyu.interfaces.IMessageHandleService;
-import com.google.protobuf.MessageLite;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +13,7 @@ import org.apache.dubbo.config.annotation.DubboReference;
  * @author Zhuff
  */
 @Slf4j
-public class GenericMsgHandler extends SimpleChannelInboundHandler<Messages.Msg> {
+public class GenericMsgHandler extends SimpleChannelInboundHandler<Messages.Msg> implements NamedHandler {
   @DubboReference
   private IMessageHandleService messageHandleService;
   @Override
@@ -27,5 +26,10 @@ public class GenericMsgHandler extends SimpleChannelInboundHandler<Messages.Msg>
       return;
     }
     channelHandlerContext.fireChannelRead(msg);
+  }
+
+  @Override
+  public String name() {
+    return "genericMsgHandler";
   }
 }

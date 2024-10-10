@@ -1,6 +1,5 @@
 package com.feiyu.connector.handlers;
 
-import com.feiyu.base.proto.Messages;
 import com.google.protobuf.MessageLite;
 import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import java.lang.reflect.InvocationTargetException;
@@ -12,7 +11,7 @@ import java.util.Properties;
  *
  * @author Zhuff
  */
-public class ProtobufDecoderWrapper extends ProtobufDecoder implements BaseHandler{
+public class ProtobufDecoderWrapper extends ProtobufDecoder implements NamedHandler {
   public ProtobufDecoderWrapper(Properties properties) {
     super(messageLite(properties.getProperty("client.message-lite")));
   }

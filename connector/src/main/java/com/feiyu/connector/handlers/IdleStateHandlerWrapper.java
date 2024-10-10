@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Zhuff
  */
-public class IdleStateHandlerWrapper extends IdleStateHandler implements BaseHandler{
+public class IdleStateHandlerWrapper extends IdleStateHandler implements NamedHandler {
   public IdleStateHandlerWrapper(Properties properties) {
     super(false,
       Integer.parseInt(properties.getProperty("client.reader-idle-time", "0")),
