@@ -1,14 +1,12 @@
 package com.feiyu.connector.config;
 
-import com.feiyu.connector.handlers.BaseHandler;
+import com.feiyu.connector.handlers.NamedHandler;
 import com.feiyu.connector.utils.HandlersFactory;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -46,8 +44,8 @@ public class HandlersConfig {
   public static void initPipeline(ChannelPipeline pipeline) {
     for (Supplier<ChannelHandler> handlerSupplier : CLIENT_HANDLERS) {
       ChannelHandler channelHandler = handlerSupplier.get();
-      if (channelHandler instanceof BaseHandler) {
-        pipeline.addLast(((BaseHandler) channelHandler).name(), channelHandler);
+      if (channelHandler instanceof NamedHandler) {
+        pipeline.addLast(((NamedHandler) channelHandler).name(), channelHandler);
       } else {
         pipeline.addLast(channelHandler);
       }

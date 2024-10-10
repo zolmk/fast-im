@@ -1,6 +1,7 @@
 package com.feiyu.connector.service;
 
 import com.feiyu.base.Named;
+import com.feiyu.base.QueueInfo;
 import io.netty.channel.Channel;
 
 import java.util.List;
@@ -13,13 +14,13 @@ public interface MessageReceiver extends Named {
    * 挂载队列到当前节点
    * @param mqs 消息队列列表
    */
-  void mount(List<String> mqs);
+  void mount(List<QueueInfo> mqs);
 
   /**
    * 解挂队列
    * @param mqs 队列列表
    */
-  void unmount(List<String> mqs);
+  void unmount(List<QueueInfo> mqs);
 
   /**
    * 将用户注册到mq上
@@ -28,14 +29,14 @@ public interface MessageReceiver extends Named {
    *
    * @param uid 用户ID
    * @param channel 用户channel
-   * @param mq 队列名称
+   * @param mqId 队列ID
    */
-  void register(String uid, Channel channel, String mq);
+  void register(String uid, Channel channel, long mqId);
 
   /**
    * 取消用户注册
    * @param uid 用户ID
    * @param mq 队列名称
    */
-  void unregister(String uid, String mq);
+  void unregister(String uid, long mq);
 }

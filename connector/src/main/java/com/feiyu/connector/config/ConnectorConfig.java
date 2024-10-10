@@ -1,11 +1,11 @@
 package com.feiyu.connector.config;
 
-
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,9 +29,11 @@ public class ConnectorConfig {
 
   private int soBacklog = 5000;
 
-  private String mqMallocStrategy = "range";
+  private String mqAllocator = "range";
 
   private String messageReceiver = "kafka";
+
+  private String mqChooser = "round";
 
   private List<String> topicList = new ArrayList<>();
 }

@@ -27,20 +27,16 @@ import java.util.stream.Collectors;
 
 @Component
 @Slf4j
-public class ConnectorDistributionController extends ZooKeeperDistributionController implements ApplicationContextAware {
-
-  private ApplicationContext applicationContext;
+public class ConnectorDistributionController extends ZooKeeperDistributionController {
   private final ConnectorConfig connectorConfig;
   private final JsonMapper jsonMapper;
   private final CuratorFramework client;
-  private final NamedBeanProvider namedBeanProvider;
 
-  public ConnectorDistributionController(ConnectorConfig connectorConfig, ZKConfig zkConfig, JsonMapper jsonMapper, NamedBeanProvider namedBeanProvider) {
+  public ConnectorDistributionController(ConnectorConfig connectorConfig, ZKConfig zkConfig, JsonMapper jsonMapper) {
     super(connectorConfig.getId(), zkConfig);
     this.jsonMapper = jsonMapper;
     this.connectorConfig = connectorConfig;
     this.client = zkConfig.curatorFramework();
-    this.namedBeanProvider = namedBeanProvider;
   }
 
   @Override
@@ -53,7 +49,7 @@ public class ConnectorDistributionController extends ZooKeeperDistributionContro
         // realloc queue
         // 分配队列给其他 Worker
         log.info("node create: {}", new String(data.getData()));
-        MQAllocator allocator = namedBeanProvider.matchPrefix(connectorConfig.getMqMallocStrategy(), MQAllocator.class);
+        MQAllocator allocator = NamedBeanProvider.getSingleton(MQAllocator.class);
         log.info("mq allocator type : {}", allocator.name());
         Map<String, List<String>> range = allocator.alloc(workers(), connectorConfig.getTopicList());
         updateWorkerQueue(range);
@@ -94,12 +90,6 @@ public class ConnectorDistributionController extends ZooKeeperDistributionContro
   private List<String> workers() {
     return curatorCache.stream().map(ChildData::getPath).filter(s->s.startsWith(zkConfig.getWorkerPath()+"/")).collect(Collectors.toList());
   }
-
-  @Override
-  public void setApplicationContext(@Nonnull ApplicationContext context) throws BeansException {
-    this.applicationContext = context;
-  }
-
 
   // 主节点，负责topic的分配
   public class ControllerTask implements Runnable {

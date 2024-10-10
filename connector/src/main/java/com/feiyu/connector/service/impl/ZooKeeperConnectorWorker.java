@@ -5,12 +5,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.feiyu.base.QueueInfo;
+import com.feiyu.base.QueueInfoStore;
+import com.feiyu.base.eventbus.EventBus;
 import com.feiyu.base.utils.NetUtil;
 import com.feiyu.connector.config.ConnectorConfig;
 import com.feiyu.connector.config.ZKConfig;
 import com.feiyu.connector.service.ConnectorWorker;
 import com.feiyu.connector.service.MessageReceiver;
 import com.feiyu.connector.utils.NamedBeanProvider;
+import com.feiyu.connector.utils.WorkerQueuesChangeEvent;
 import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
@@ -25,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 基于zk的连接器工作节点的实现
@@ -37,14 +42,12 @@ public class ZooKeeperConnectorWorker implements ConnectorWorker {
   private final ZKConfig zkConfig;
   private final ConnectorConfig connectorConfig;
   private final ObjectMapper objectMapper;
-  private final NamedBeanProvider namedBeanProvider;
 
-  public ZooKeeperConnectorWorker(ZKConfig zkConfig, ConnectorConfig connectorConfig, ObjectMapper objectMapper, NamedBeanProvider namedBeanProvider) {
+  public ZooKeeperConnectorWorker(ZKConfig zkConfig, ConnectorConfig connectorConfig, ObjectMapper objectMapper) {
     this.zkConfig = zkConfig;
     this.client = zkConfig.curatorFramework();
     this.connectorConfig = connectorConfig;
     this.objectMapper = objectMapper;
-    this.namedBeanProvider = namedBeanProvider;
   }
 
   @Override
@@ -75,21 +78,26 @@ public class ZooKeeperConnectorWorker implements ConnectorWorker {
 
   @Override
   public void event(Type type, ChildData oldData, ChildData newData) {
-    log.info("path: {} data: {}", newData.getPath(), new String(newData.getData(), StandardCharsets.UTF_8));
     Set<String> oldTopics = readTopics(oldData);
     Set<String> newTopics = readTopics(newData);
 
     Set<String> mount = Sets.difference(newTopics, oldTopics);
     Set<String> unmount = Sets.difference(oldTopics, newTopics);
 
-    MessageReceiver messageReceiver = namedBeanProvider.matchPrefix(connectorConfig.getMessageReceiver(), MessageReceiver.class);
-
+    MessageReceiver messageReceiver = NamedBeanProvider.getSingleton(MessageReceiver.class);
+    List<QueueInfo> mountList = null;
     if ( ! mount.isEmpty()) {
-      messageReceiver.mount(new ArrayList<>(mount));
+      mountList = mount.stream().map(QueueInfoStore::create).collect(Collectors.toList());
+      messageReceiver.mount(mountList);
+    }
+    List<QueueInfo> unmountList = null;
+    if ( ! unmount.isEmpty()) {
+      unmountList = unmount.stream().map(QueueInfoStore::create).collect(Collectors.toList());
+      messageReceiver.unmount(unmountList);
     }
 
-    if ( ! unmount.isEmpty()) {
-      messageReceiver.unmount(new ArrayList<>(unmount));
+    if ( ! mount.isEmpty() || ! unmount.isEmpty()) {
+      EventBus.post(new WorkerQueuesChangeEvent(mountList, unmountList));
     }
   }
 
