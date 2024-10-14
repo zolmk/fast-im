@@ -20,11 +20,12 @@
         <mybatis.version>3.5.5</mybatis.version>
         <jedis.version>5.0.0</jedis.version>
         <mysql.version>8.0.21</mysql.version>
-        <curator.version>5.0.0</curator.version>
+        <curator.version>5.1.0</curator.version>
         <lombok.version>1.18.24</lombok.version>
-        <springboot.version>2.6.7</springboot.version>
+        <springboot.version>2.7.5</springboot.version>
         <spring.cloud.version>2021.0.6</spring.cloud.version>
         <dubbo.version>3.2.11</dubbo.version>
+        <kafka.version>2.5.0</kafka.version>
     </properties>
 
     <dependencyManagement>
@@ -105,18 +106,12 @@
                 </exclusions>
             </dependency>
 
-            <!-- https://mvnrepository.com/artifact/org.apache.dubbo/dubbo-spring-boot-starter -->
             <dependency>
-                <groupId>org.apache.dubbo</groupId>
-                <artifactId>dubbo</artifactId>
-                <version>${dubbo.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>io.netty</groupId>
-                        <artifactId>netty-all</artifactId>
-                    </exclusion>
-                </exclusions>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java-util</artifactId>
+                <version>${protobuf.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.apache.dubbo</groupId>
                 <artifactId>dubbo-dependencies-zookeeper</artifactId>
@@ -129,6 +124,11 @@
                 <version>${dubbo.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-clients</artifactId>
+                <version>${kafka.version}</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>

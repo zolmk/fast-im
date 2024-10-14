@@ -1,8 +1,10 @@
-com.feiyu.connector.handlers.IdleStateHandlerWrapper
 io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender
 io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder
 io.netty.handler.codec.protobuf.ProtobufEncoder
 com.feiyu.connector.handlers.ProtobufDecoderWrapper
+com.feiyu.connector.handlers.IdleStateHandlerWrapper
 com.feiyu.connector.handlers.ControlMsgHandler
 com.feiyu.connector.handlers.GenericMsgHandler
+com.feiyu.connector.handlers.NoticeMsgHandler
 com.feiyu.connector.handlers.UnifiedHeartbeatHandler
+com.feiyu.connector.handlers.UnifiedExceptionHandler

@@ -66,9 +66,11 @@ public abstract class ZooKeeperDistributionController extends DistributionContro
     @Override
     public void describeWorker() {
         log.info("Controller describe worker.");
-        curatorCache.listenable().removeListener(this);
-        curatorCache.close();
-        curatorCache = null;
+        if (this.curatorCache != null) {
+            curatorCache.listenable().removeListener(this);
+            curatorCache.close();
+            curatorCache = null;
+        }
     }
 
     @Override

@@ -1,0 +1,20 @@
+## mybatis
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://111.230.15.9:3306/chat_server?useUnicode=true&characterEncoding=gbk&autoReconnect=true&failOverReadOnly=false
+    username: root
+    password: zolmk!@#$
+  profiles:
+    active: dev
+  application:
+    name: core
+
+dubbo:
+  application:
+    name: core
+  protocol:
+    name: tri
+    port: -1
+  registry:
+    address: zookeeper://xx.xx.xx.xx?client=curator

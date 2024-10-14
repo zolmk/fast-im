@@ -1,0 +1,29 @@
+connector:
+  id: 1
+  boss-count: 5
+  worker-count: 10
+  accept-port: 9997
+  so-backlog: 5000
+  message-receiver: kafka
+  mq-allocator: range
+  topic-list:
+    - xx.xx.xx.xx:2181=topic-1
+    - xx.xx.xx.xx:2181=topic-2
+    -
+  zk:
+    connect-str: xx.xx.xx.xx:2181
+
+spring:
+  profiles:
+    active: dev
+  application:
+    name: connector
+
+dubbo:
+  application:
+    name: connector
+  protocol:
+    name: tri
+    port: -1
+  registry:
+    address: zookeeper://xx.xx.xx.xx?client=curator

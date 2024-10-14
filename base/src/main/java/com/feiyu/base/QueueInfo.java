@@ -20,7 +20,7 @@ public class QueueInfo {
 
   private final static AtomicLong idGenerator = new AtomicLong(0);
 
-  QueueInfo(String queueName, String connectStr) {
+  QueueInfo(String connectStr, String queueName) {
     this.queueName = queueName;
     this.connectStr = connectStr;
     this.id = idGenerator.incrementAndGet();
