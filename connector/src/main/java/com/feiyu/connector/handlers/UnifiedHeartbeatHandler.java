@@ -1,7 +1,7 @@
 package com.feiyu.connector.handlers;
 
 import com.feiyu.base.proto.Messages;
-import com.feiyu.base.proto.ProtoUtil;
+import com.feiyu.base.proto.ProtocolUtil;
 import io.netty.channel.*;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
@@ -52,11 +52,13 @@ public class UnifiedHeartbeatHandler extends SimpleChannelInboundHandler<Message
           this.heartbeatCallback = heartbeatCallbackSupplier.apply(ctx.channel());
         }
         this.heartbeatCallback.reset();
-      } else {
+      } else if (Messages.HeartbeatType.PING.equals(heartbeatMsg.getType())) {
         // 如果是 PING 包，则回复 PONG
-        ctx.writeAndFlush(ProtoUtil.heartbeat(Messages.HeartbeatType.PONG, new byte[0]));
+        ctx.writeAndFlush(ProtocolUtil.PONG);
       }
+      return;
     }
+    ctx.fireChannelRead(msg);
   }
 
   @Override
@@ -64,7 +66,7 @@ public class UnifiedHeartbeatHandler extends SimpleChannelInboundHandler<Message
     if (evt instanceof IdleStateEvent) {
       if (IdleState.WRITER_IDLE.equals(((IdleStateEvent) evt).state())) {
         // 写空闲超时，写 PING 包
-        ctx.writeAndFlush(ProtoUtil.heartbeat(Messages.HeartbeatType.PING, new byte[0]));
+        ctx.writeAndFlush(ProtocolUtil.PING);
         this.future = ctx.channel().eventLoop().schedule(this.heartbeatCallback, timeout, timeUnit);
       } else if (IdleState.READER_IDLE.equals(((IdleStateEvent) evt).state())) {
         log.info("The channel unread too many time.");
@@ -115,7 +117,7 @@ public class UnifiedHeartbeatHandler extends SimpleChannelInboundHandler<Message
         return;
       }
       if (channel.isWritable() && this.retry > 0) {
-        channel.writeAndFlush(ProtoUtil.heartbeat(Messages.HeartbeatType.PING, new byte[0]));
+        channel.writeAndFlush(ProtocolUtil.PING);
         channel.eventLoop().schedule(this, this.timeout, this.timeUnit);
         this.retry--;
       } else {

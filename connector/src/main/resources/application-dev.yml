@@ -1,0 +1,9 @@
+dubbo:
+  registry:
+    address: zookeeper://111.230.15.9:2181?client=curator
+connector:
+  zk:
+    connect-str: 111.230.15.9:2181
+  topic-list:
+    - 111.230.15.9:9092=topic-1
+    - 111.230.15.9:9092=topic-2

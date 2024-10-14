@@ -71,15 +71,17 @@ public class EventBus {
    * 分发事件
    * @param event e
    */
-  public static void post(Object event) {
+  public static CompletableFuture<Void> post(Object event) {
     Class<?> aClass = event.getClass();
     Set<MethodCaller> methods = methodCallers.get(aClass);
     if (methods == null || methods.isEmpty()) {
-      return;
+      return CompletableFuture.completedFuture(null);
     }
+    List<CompletableFuture<Void>> futures = new ArrayList<>();
     for (MethodCaller methodCaller : methods) {
-      methodCaller.call(event);
+      futures.add(methodCaller.call(event));
     }
+    return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
   }
 
   private static List<Method> getMethods(Class<?> clazz) {
@@ -105,19 +107,40 @@ public class EventBus {
       this.method = method;
       this.target = target;
     }
-    public void call(Object event) {
+    public CompletableFuture<Void> call(Object event) {
       Subscribe subscribe = method.getAnnotation(Subscribe.class);
+      CompletableFuture<Void> future = null;
+      // 如果配置异步执行，则使用线程池执行函数调用
       if (subscribe.async()) {
-        executorService.submit(()->{call0(event);});
+        future = CompletableFuture.runAsync(() -> {
+          if (!call0(event)) {
+            throw new RuntimeException("event bus method call failed");
+          }
+        }, executorService);
       } else {
-        call0(event);
+        if (call0(event)) {
+          future = CompletableFuture.completedFuture(null);
+        } else {
+          future = CompletableFuture.failedFuture(new RuntimeException("event bus method call failed"));
+        }
       }
+      return future;
     }
-    public void call0(Object event) {
+
+    /**
+     * 通过反射调用目标函数
+     * true 调用成功
+     * false 调用失败
+     * @param event
+     * @return
+     */
+    private boolean call0(Object event) {
       try {
         method.invoke(this.target, event);
+        return true;
       } catch (IllegalAccessException | InvocationTargetException e) {
-        EventBus.log.error(e.getMessage(), e);
+        EventBus.log.error("event bus method call failed. cause: {}", e.getMessage());
+        return false;
       }
     }
 

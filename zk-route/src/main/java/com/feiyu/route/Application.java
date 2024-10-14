@@ -1,7 +1,7 @@
 package com.feiyu.route;
 
 
-import com.feiyu.interfaces.ISequenceService;
+import com.feiyu.interfaces.idl.ISequenceService;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.springframework.boot.CommandLineRunner;

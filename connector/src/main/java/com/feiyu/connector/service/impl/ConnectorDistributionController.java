@@ -12,6 +12,7 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.ChildData;
 import org.apache.dubbo.common.utils.StringUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 
 @Component
 @Slf4j
-public class ConnectorDistributionController extends ZooKeeperDistributionController {
+public class ConnectorDistributionController extends ZooKeeperDistributionController implements DisposableBean {
   private final ConnectorConfig connectorConfig;
   private final JsonMapper jsonMapper;
   private final CuratorFramework client;
@@ -57,7 +58,7 @@ public class ConnectorDistributionController extends ZooKeeperDistributionContro
       break;
       case NODE_DELETED: {
         // nothing
-        log.info("node removed. {}", data.getPath());
+        log.info("node removed. {}", data);
       }
       break;
     }

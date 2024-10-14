@@ -1,0 +1,32 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package com.feiyu.interfaces.idl;
+
+import "messages.proto";
+import "google/protobuf/empty.proto";
+
+message MsgHandleRsp {
+  int64 msgId = 1;
+  int64 seq = 2;
+}
+
+service IMessageHandleService {
+  rpc handle(Msg) returns (MsgHandleRsp);
+}
+
+service IMessageRouteService {
+  rpc route(Msg) returns (google.protobuf.Empty);
+}
+
+message SequenceReq {
+  int64 uid = 1;
+}
+
+message SequenceRsp {
+  int64 seq = 1;
+}
+
+service ISequenceService {
+  rpc gen(SequenceReq) returns (SequenceRsp);
+}
+

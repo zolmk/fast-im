@@ -18,6 +18,9 @@
         <module>zk-route</module>
         <module>sequence</module>
         <module>interfaces</module>
+        <module>client</module>
+        <module>proto-gen</module>
+        <module>service-comsumer</module>
     </modules>
 
     <properties>

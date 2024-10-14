@@ -4,7 +4,8 @@ import com.feiyu.base.FastImThreadFactory;
 import com.feiyu.base.R;
 import com.feiyu.base.Result;
 import com.feiyu.base.UserEventPublisher;
-import com.feiyu.interfaces.ISequenceService;
+import com.feiyu.interfaces.idl.ISequenceService;
+import com.feiyu.interfaces.idl.SequenceReq;
 import com.google.protobuf.MessageLite;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -84,11 +85,11 @@ public class ZkPostOffice implements PostOffice<MessageLite, Long, MessageLite, 
 
   @Override
   public Optional<Long> nextMsgSeq(Long aLong) {
-    Result<?> gen = sequenceService.gen(aLong);
-    if (gen.getCode() == R.CODE_FAIL) {
+    long gen = sequenceService.gen(SequenceReq.newBuilder().setUid(aLong).build()).getSeq();
+    if (gen < 0) {
       return Optional.empty();
     }
-    return Optional.of((Long) gen.getData());
+    return Optional.of(gen);
   }
 
   @Override

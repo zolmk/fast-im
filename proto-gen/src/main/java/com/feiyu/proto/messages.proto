@@ -1,0 +1,144 @@
+syntax="proto3";
+option java_outer_classname="Messages";
+option java_package="com.feiyu.base.proto";
+option optimize_for=SPEED;
+
+// protoc -I E:\Program\java\fast-im\proto-gen\src\main\java\com\feiyu\proto --java_out=E:\Program\java\fast-im\base\src\main\java messages.proto
+
+message Msg {
+  /** 消息类型 */
+  MsgType type=1;
+  oneof info {
+    /** 普通消息 */
+    GenericMsg genericMsg=2;
+    /** 通知 */
+    NoticeMsg noticeMsg=3;
+    /** 查询 */
+    QueryMsg queryMsg=4;
+    /** 控制 */
+    ControlMsg controlMsg=5;
+    /** 心跳 */
+    HeartbeatMsg heartbeatMsg=6;
+  }
+}
+/**
+  消息类型，共五种：通知、通用消息、控制消息、查询消息、心跳
+ */
+enum MsgType {
+  NOTICE=0;
+  GENERIC=1;
+  CONTROL=2;
+  QUERY=3;
+  HEARTBEAT=4;
+}
+
+/**
+  通用消息体
+ */
+message GenericMsg {
+  Peers peers=1;          // 通信双方
+  int32 type=2;           // 消息的具体类型
+  bytes data=3;           // 数据
+  optional MsgExtraInfo extraInfo=4;  // 消息的额外信息，接收方用
+  optional int64 cltSeq=5;  // 客户端消息序列号，发送方用
+}
+
+message Peers {
+  int64 from=1;
+  int64 to=2;
+}
+
+/**
+  消息的额外信息
+ */
+message MsgExtraInfo {
+  int64 msgId=4;            // 消息ID，接收方用
+  int64 seq=5;            // 消息序列号，接收方用
+  int64 timestamp=6;        // 消息时间戳，接收方用
+  optional int64 digest=8;  // 消息的签名 = crc16(data) & to
+}
+
+/**
+  通知
+ */
+message NoticeMsg {
+  NoticeType type=1;
+  oneof info {
+    int64 msgId=2;                  // 已送达通知、已读通知
+    MsgDeliveryAck msgDeliverAck=4;   // 已送达、已读 ack
+    bool hasUnread=5;               // 用于登录ack
+    MsgRevAck msgRevAck=6;          // 用于已接收ack
+  }
+}
+
+message MsgDeliveryAck {
+  repeated int64 msgId=1;  // 与from一一对应
+  repeated int64 from=2;
+}
+
+message MsgRevAck {
+  int64 msgId = 1;        // 消息ID
+  int64 cltSeq = 2;       // 期望收到的客户端消息序列号
+}
+
+enum NoticeType {
+  RECEIVED_ACK=0;         // 已接收ack
+  DELIVERED=1;            // 已投递通知
+  READ=2;                 // 已读通知
+  DELIVERED_ACK=3;        // 已送达ACK
+  READ_ACK=4;             // 已读ACK
+  LOGIN_ACK=5;            // 登录ACK
+}
+/**
+  查询报文
+ */
+message QueryMsg {
+  QueryType type=1;
+  optional int64 to=2;
+  repeated PullMsgReq pullMsgReqs=3;
+}
+
+message PullMsgReq {
+  int64 from = 1;
+  int64 seq = 2;
+  int64 msgId = 3;
+}
+
+enum QueryType {
+  MSG_STATE_QUERY=0;       // 查询消息状态
+  MSG_PULL=1;              // 拉取消息
+}
+
+/**
+  控制报文
+ */
+message ControlMsg {
+  ControlType type=1;
+  oneof info {
+    ClientInfo clientInfo=2;
+    int64 msgId=3;
+  }
+}
+
+enum ControlType {
+  MSG_DELIVERED_FAIL=0;
+  CLIENT_LOGIN=1;
+  CONNECT_REST=2;
+}
+
+message ClientInfo {
+  int64 uid=1;              // 用户ID
+  int64 cltMsgSeq=2;        // 客户端消息序号
+  string dvcName=3;         // 设备名称
+  string dvcSerialNumber=4; // 设备序列号
+}
+
+message HeartbeatMsg {
+  HeartbeatType type=1;
+  bytes data=2;
+}
+
+enum HeartbeatType {
+  PING=0;
+  PONG=1;
+}

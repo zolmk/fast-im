@@ -1,13 +1,13 @@
 package com.feiyu.connector.handlers;
 
-import com.feiyu.base.eventbus.EventBus;
 import com.feiyu.base.proto.Messages;
+import com.feiyu.connector.service.ClientLoginService;
 import com.feiyu.connector.service.MQChooser;
-import com.feiyu.connector.utils.ChannelRegisterEvent;
-import com.feiyu.connector.utils.ChannelUnregisterEvent;
+import com.feiyu.connector.service.impl.SimpleClientLoginService;
 import com.feiyu.connector.utils.NamedBeanProvider;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -18,22 +18,27 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ControlMsgHandler extends SimpleChannelInboundHandler<Messages.Msg> implements NamedHandler {
   private final MQChooser chooser;
+  private final ClientLoginService loginService;
   public ControlMsgHandler() {
     this.chooser = NamedBeanProvider.getSingleton(MQChooser.class);
+    this.loginService = new SimpleClientLoginService();
   }
-  private Messages.ClientInfo clientInfo;
+
+  @Getter
+  private Messages.ClientInfo clientInfo = null;
+  @Getter
   private long qid;
 
   @Override
-  protected void channelRead0(ChannelHandlerContext channelHandlerContext, Messages.Msg msg) throws Exception {
+  protected void channelRead0(ChannelHandlerContext ctx, Messages.Msg msg) throws Exception {
     if (Messages.MsgType.CONTROL.equals(msg.getType())) {
       Messages.ControlMsg controlMsg = msg.getControlMsg();
       switch (controlMsg.getType()) {
         case CLIENT_LOGIN: {
-          // 用户登录
           this.clientInfo = controlMsg.getClientInfo();
-          this.qid = chooser.choice(clientInfo);
-          EventBus.post(new ChannelRegisterEvent(String.valueOf(clientInfo.getUid()), channelHandlerContext.channel(), qid));
+          long qid = chooser.choice(clientInfo);
+          this.loginService.login(clientInfo, ctx, qid);
+          this.qid = qid;
         } break;
         case MSG_DELIVERED_FAIL: {
           // ignore
@@ -41,17 +46,19 @@ public class ControlMsgHandler extends SimpleChannelInboundHandler<Messages.Msg>
         default: {
           log.info("unknown msg type: {}", msg.getType());
         } break;
-
       }
+      // 拦截所有控制消息
+      return;
     }
-    channelHandlerContext.fireChannelRead(msg);
+    // 当用户已登录 或 消息类型为通知 时放行
+    if (loginService.isOnline() || Messages.MsgType.NOTICE.equals(msg.getType())) {
+      ctx.fireChannelRead(msg);
+    }
   }
 
   @Override
   public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-    if (clientInfo != null) {
-      EventBus.post(new ChannelUnregisterEvent(String. valueOf(clientInfo.getUid()), qid));
-    }
+    this.loginService.logout();
     super.channelUnregistered(ctx);
   }
 
