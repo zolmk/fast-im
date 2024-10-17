@@ -1,24 +1,25 @@
 package com.feiyu.base;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+@Data
 public class QueueInfo {
 
-  @Getter
   private long id;
 
-  @Getter
-  @Setter
   private String queueName;
 
-  @Getter
-  @Setter
   private String connectStr;
 
   private final static AtomicLong idGenerator = new AtomicLong(0);
+
+  // for 反序列化
+  public QueueInfo() {
+  }
 
   QueueInfo(String connectStr, String queueName) {
     this.queueName = queueName;

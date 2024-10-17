@@ -1,6 +1,6 @@
 package com.feiyu.connector.utils;
 
-import com.feiyu.base.RunOnce;
+import com.feiyu.base.interfaces.RunOnce;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,6 +35,11 @@ public class SimpleEventLoop implements Runnable, Closeable {
           RunOnce runOnce = iterator.next();
           if (runOnce.isRevoked()) {
             iterator.remove();
+            try {
+              runOnce.close();
+            } catch (IOException e) {
+              log.error("close RunOnce error.", e);
+            }
             continue;
           }
           try {

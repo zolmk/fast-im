@@ -22,13 +22,13 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class RoundMQChooser implements MQChooser {
 
   private final ReentrantReadWriteLock lock;
-  private volatile AtomicInteger cursor;
+  private volatile int cursor;
   private List<Long> queueIds;
 
   public RoundMQChooser() {
     EventBus.register(this);
     this.lock = new ReentrantReadWriteLock();
-    this.cursor = new AtomicInteger(0);
+    this.cursor = 0;
     this.queueIds = new ArrayList<>();
   }
 
@@ -40,14 +40,13 @@ public class RoundMQChooser implements MQChooser {
       if (queueIds.isEmpty()) {
         return qid;
       }
-      qid = queueIds.get(this.cursor.getAndIncrement());
-      if (this.cursor.get() == queueIds.size()) {
-        this.cursor.compareAndSet(this.queueIds.size(), 0);
+      qid = queueIds.get(this.cursor);
+      if (this.cursor == queueIds.size()) {
+        this.cursor = 0;
       }
     }finally {
       this.lock.readLock().unlock();
     }
-    log.info("client {} choice qid {}", clientInfo.toString(), qid);
     return qid;
   }
 
@@ -71,7 +70,7 @@ public class RoundMQChooser implements MQChooser {
     } finally {
       this.lock.writeLock().unlock();
     }
-    log.info("queue changed to {}", this.queueIds);
+    log.info("handle queue change event {} success.", event);
   }
 
   @Override

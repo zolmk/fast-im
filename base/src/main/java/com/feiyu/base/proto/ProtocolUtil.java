@@ -1,5 +1,7 @@
 package com.feiyu.base.proto;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 public final class ProtocolUtil {
@@ -80,6 +82,63 @@ public final class ProtocolUtil {
       .setType(Messages.MsgType.NOTICE)
       .setNoticeMsg(noticeMsg)
       .build();
+  }
+
+  /**
+   * 构造消息已投递ack
+   * @param msgId
+   * @param from
+   * @return
+   */
+  public static Messages.Msg messageDeliveredAck(long msgId, long from) {
+    return messageDeliveredAck(Collections.singletonList(msgId), Collections.singletonList(from));
+  }
+
+  public static Messages.Msg messageDeliveredAck(List<Long> msgIds, List<Long> froms) {
+    Messages.MsgDeliveryAck deliveryAck = genMsgDeliveryAck(msgIds, froms);
+    return Messages.Msg.newBuilder()
+      .setType(Messages.MsgType.NOTICE)
+      .setNoticeMsg(Messages.NoticeMsg.newBuilder()
+        .setType(Messages.NoticeType.DELIVERED_ACK)
+        .setMsgDeliverAck(deliveryAck).build())
+      .build();
+  }
+
+  private static Messages.MsgDeliveryAck genMsgDeliveryAck(List<Long> msgIds, List<Long> froms) {
+    if (msgIds.size() != froms.size()) {
+      throw new IllegalArgumentException("msgIds.size() != froms.size()");
+    }
+    Messages.MsgDeliveryAck.Builder builder = Messages.MsgDeliveryAck.newBuilder();
+    for (int i = 0; i < msgIds.size(); i++) {
+      builder.addMsgId(msgIds.get(i));
+      builder.addFrom(froms.get(i));
+    }
+    return builder.build();
+  }
+
+  public static Messages.Msg messageReadAck(long msgId, long from) {
+    return messageReadAck(Collections.singletonList(msgId), Collections.singletonList(from));
+  }
+
+  /**
+   * 构造已读ack
+   * @return
+   */
+  public static Messages.Msg messageReadAck(List<Long> msgIds, List<Long> froms) {
+    Messages.MsgDeliveryAck deliveryAck = genMsgDeliveryAck(msgIds, froms);
+    Messages.NoticeMsg noticeMsg = Messages.NoticeMsg.newBuilder().setType(Messages.NoticeType.READ_ACK).setMsgDeliverAck(deliveryAck).build();
+    return Messages.Msg.newBuilder().setType(Messages.MsgType.NOTICE).setNoticeMsg(noticeMsg).build();
+  }
+
+
+  /**
+   * 消息投递失败
+   * @param msgId
+   * @return
+   */
+  public static Messages.Msg messageDeliverFailed(long msgId) {
+    Messages.ControlMsg controlMsg = Messages.ControlMsg.newBuilder().setType(Messages.ControlType.MSG_DELIVERED_FAIL).setMsgId(msgId).build();
+    return Messages.Msg.newBuilder().setType(Messages.MsgType.CONTROL).setControlMsg(controlMsg).build();
   }
 
 

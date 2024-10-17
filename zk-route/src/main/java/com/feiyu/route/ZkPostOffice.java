@@ -1,8 +1,6 @@
 package com.feiyu.route;
 
 import com.feiyu.base.FastImThreadFactory;
-import com.feiyu.base.R;
-import com.feiyu.base.Result;
 import com.feiyu.base.UserEventPublisher;
 import com.feiyu.interfaces.idl.ISequenceService;
 import com.feiyu.interfaces.idl.SequenceReq;

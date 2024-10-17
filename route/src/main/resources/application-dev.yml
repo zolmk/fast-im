@@ -1,0 +1,7 @@
+dubbo:
+  registry:
+    address: zookeeper://111.230.15.9:2181?client=curator
+
+spring:
+  redis:
+    host: 111.230.15.9

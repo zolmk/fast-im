@@ -4,7 +4,6 @@ import com.feiyu.base.RetryableTask;
 import com.feiyu.base.proto.Messages;
 import com.feiyu.connector.utils.MessageFailoverInfo;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.TimeUnit;
@@ -29,7 +28,7 @@ public class MessageSendTask extends RetryableTask {
       channel.writeAndFlush(msg);
     } else {
       // 通道不可写，直接进行故障转移，然后结束任务
-      this.failoverConsumer.accept(new MessageFailoverInfo(String.valueOf(to), msg, MessageFailoverInfo.Reason.SEND_EXHAUSTED));
+      this.failoverConsumer.accept(new MessageFailoverInfo(to, msg, MessageFailoverInfo.Reason.SEND_EXHAUSTED));
       return true;
     }
     return false;
@@ -37,6 +36,6 @@ public class MessageSendTask extends RetryableTask {
 
   @Override
   public void failover() {
-    this.failoverConsumer.accept(new MessageFailoverInfo(String.valueOf(to), msg, MessageFailoverInfo.Reason.SEND_EXHAUSTED));
+    this.failoverConsumer.accept(new MessageFailoverInfo(to, msg, MessageFailoverInfo.Reason.SEND_EXHAUSTED));
   }
 }

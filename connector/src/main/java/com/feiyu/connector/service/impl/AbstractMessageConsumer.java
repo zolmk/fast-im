@@ -1,7 +1,8 @@
 package com.feiyu.connector.service.impl;
 
 import com.feiyu.base.QueueInfo;
-import com.feiyu.connector.service.MessageReceiver;
+import com.feiyu.connector.service.MessageConsumer;
+import com.feiyu.connector.utils.MessageFailoverInfo;
 import io.netty.channel.Channel;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -11,18 +12,19 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 @Slf4j
-public abstract class AbstractMessageConsumer implements MessageReceiver {
+public abstract class AbstractMessageConsumer implements MessageConsumer {
 
-  protected Map<Long, Map<String, Channel>> mqMap = new ConcurrentHashMap<>();
+  protected Map<Long, Map<Long, Channel>> mqMap = new ConcurrentHashMap<>();
 
   public abstract void mount(List<QueueInfo> mqs);
 
   public abstract void unmount(List<QueueInfo> mqs);
 
   @Override
-  public void register(String uid, Channel channel, long mqId) {
+  public void register(long uid, Channel channel, long mqId) {
     if (!mqMap.containsKey(mqId)) {
       log.error("Register Queue Id: {} not exist", mqId);
       throw new RuntimeException("Queue Id: " + mqId + " not exist");
@@ -31,7 +33,7 @@ public abstract class AbstractMessageConsumer implements MessageReceiver {
   }
 
   @Override
-  public void unregister(String uid, long mq) {
+  public void unregister(long uid, long mq) {
     if (!mqMap.containsKey(mq)) {
       log.info("Unregister Queue Id: {} not exist", mq);
       return;
@@ -40,6 +42,7 @@ public abstract class AbstractMessageConsumer implements MessageReceiver {
   }
 
   public abstract String name();
+
 
   protected static class MessageConsumerThreadFactory implements ThreadFactory {
     private final AtomicInteger cnt = new AtomicInteger(1);

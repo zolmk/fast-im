@@ -1,5 +1,7 @@
 package com.feiyu.base;
 
+import com.feiyu.base.interfaces.Failover;
+import com.feiyu.base.interfaces.Revocable;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.ScheduledExecutorService;

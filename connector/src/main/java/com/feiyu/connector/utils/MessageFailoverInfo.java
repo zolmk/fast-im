@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class MessageFailoverInfo {
-  private String to;
+  private long to;
   private Messages.Msg msg;
   private Reason reason;
 

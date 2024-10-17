@@ -4,6 +4,7 @@ import com.feiyu.interfaces.idl.ISequenceService;
 import com.feiyu.interfaces.idl.SequenceReq;
 import com.feiyu.interfaces.idl.SequenceRsp;
 import com.feiyu.ulsequence.Sequence;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ import java.util.concurrent.CompletableFuture;
  * @author zhufeifei 2024/6/6
  **/
 @Component
+@Slf4j
 @DubboService(loadbalance = "consistenthash")
 public class SequenceServiceImpl implements ISequenceService {
 
@@ -30,7 +32,7 @@ public class SequenceServiceImpl implements ISequenceService {
             seq = this.sequence.nexSeq(uid.getUid());
         } catch (Exception e) {
             //TODO
-            e.printStackTrace();
+            log.error("seq generate error", e);
         }
         return SequenceRsp.newBuilder().setSeq(seq).build();
     }

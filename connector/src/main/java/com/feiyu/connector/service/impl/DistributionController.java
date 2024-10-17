@@ -1,6 +1,6 @@
 package com.feiyu.connector.service.impl;
 
-import com.feiyu.base.LifeCycle;
+import com.feiyu.base.interfaces.LifeCycle;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

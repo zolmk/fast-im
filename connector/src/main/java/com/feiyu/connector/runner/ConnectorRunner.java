@@ -1,12 +1,12 @@
 package com.feiyu.connector.runner;
 
+import com.feiyu.connector.utils.NamedBeanProvider;
 import com.feiyu.connector.config.ConnectorConfig;
 import com.feiyu.connector.config.HandlersConfig;
 import com.feiyu.connector.service.ConnectorWorker;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioChannelOption;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LogLevel;
@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+@ConditionalOnBean(NamedBeanProvider.class)
 @Order(value = 9999)
 public class ConnectorRunner implements ApplicationRunner, DisposableBean {
 

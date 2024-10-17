@@ -12,7 +12,7 @@ import com.feiyu.base.utils.NetUtil;
 import com.feiyu.connector.config.ConnectorConfig;
 import com.feiyu.connector.config.ZKConfig;
 import com.feiyu.connector.service.ConnectorWorker;
-import com.feiyu.connector.service.MessageReceiver;
+import com.feiyu.connector.service.MessageConsumer;
 import com.feiyu.connector.utils.NamedBeanProvider;
 import com.feiyu.connector.utils.WorkerQueuesChangeEvent;
 import com.google.common.collect.Sets;
@@ -22,6 +22,7 @@ import org.apache.curator.framework.recipes.cache.ChildData;
 import org.apache.curator.framework.recipes.cache.CuratorCache;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
+@Order(value = 1000)
 public class ZooKeeperConnectorWorker implements ConnectorWorker {
   private CuratorCache cache;
   private final CuratorFramework client;
@@ -83,16 +85,16 @@ public class ZooKeeperConnectorWorker implements ConnectorWorker {
     Set<String> mount = Sets.difference(newTopics, oldTopics);
     Set<String> unmount = Sets.difference(oldTopics, newTopics);
 
-    MessageReceiver messageReceiver = NamedBeanProvider.getSingleton(MessageReceiver.class);
+    MessageConsumer messageConsumer = NamedBeanProvider.getSingleton(MessageConsumer.class);
     List<QueueInfo> mountList = null;
     if ( ! mount.isEmpty()) {
       mountList = mount.stream().map(QueueInfoStore::create).collect(Collectors.toList());
-      messageReceiver.mount(mountList);
+      messageConsumer.mount(mountList);
     }
     List<QueueInfo> unmountList = null;
     if ( ! unmount.isEmpty()) {
       unmountList = unmount.stream().map(QueueInfoStore::create).collect(Collectors.toList());
-      messageReceiver.unmount(unmountList);
+      messageConsumer.unmount(unmountList);
     }
 
     if ( ! mount.isEmpty() || ! unmount.isEmpty()) {

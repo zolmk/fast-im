@@ -1,6 +1,5 @@
 package com.feiyu.connector.handlers;
 
-import com.feiyu.base.Revocable;
 import com.feiyu.base.proto.Messages;
 import com.feiyu.connector.service.NoticeHandleService;
 import com.feiyu.connector.service.impl.SimpleNoticeHandleService;
@@ -33,12 +32,15 @@ public class NoticeMsgHandler extends SimpleChannelInboundHandler<Messages.Msg> 
       Messages.NoticeMsg noticeMsg = msg.getNoticeMsg();
       switch (noticeMsg.getType()) {
         case DELIVERED_ACK: {
-          noticeHandleService.handleDeliveryAck(noticeMsg);
+          noticeHandleService.handleDeliveryAck(msg);
         } break;
         case READ_ACK: {
           // 消息已读 ack。客户端
-          noticeHandleService.handleReadAck(noticeMsg);
+          noticeHandleService.handleReadAck(msg);
         } break;
+        default: {
+          log.info("unknown notice type msg: {}", noticeMsg);
+        }
       }
       return;
     }

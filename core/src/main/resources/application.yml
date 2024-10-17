@@ -1,18 +1,24 @@
 ## mybatis
 spring:
+  profiles:
+    active: dev
+  application:
+    name: core
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://111.230.15.9:3306/chat_server?useUnicode=true&characterEncoding=gbk&autoReconnect=true&failOverReadOnly=false
     username: root
     password: zolmk!@#$
-  profiles:
-    active: dev
-  application:
-    name: core
+  redis:
+    client-type: lettuce
+    port: 6379
+    host: xx.xx.xx.xx
 
 dubbo:
   application:
     name: core
+    qos-port: 22223
+    enable-file-cache: off
   protocol:
     name: tri
     port: -1
