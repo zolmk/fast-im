@@ -15,7 +15,6 @@
         <module>core</module>
         <module>base</module>
         <module>dependencies</module>
-        <module>zk-route</module>
         <module>sequence</module>
         <module>interfaces</module>
         <module>client</module>
