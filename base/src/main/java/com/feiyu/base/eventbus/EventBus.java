@@ -139,7 +139,7 @@ public class EventBus {
         method.invoke(this.target, event);
         return true;
       } catch (IllegalAccessException | InvocationTargetException e) {
-        EventBus.log.error("event bus method call failed. cause: {}", e.getMessage());
+        EventBus.log.error("event bus method call failed. cause: {}", e.getMessage(), e);
         return false;
       }
     }

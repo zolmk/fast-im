@@ -1,6 +1,6 @@
 package com.feiyu.connector.service;
 
-import com.feiyu.base.LifeCycle;
+import com.feiyu.base.interfaces.LifeCycle;
 import org.apache.curator.framework.recipes.cache.CuratorCacheListener;
 
 /**

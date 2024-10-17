@@ -1,10 +1,10 @@
 package com.feiyu.connector.service.impl;
 
-import com.feiyu.base.Named;
+import com.feiyu.base.interfaces.Named;
 import com.feiyu.base.proto.Messages;
 import com.feiyu.interfaces.idl.IMessageHandleService;
+import com.feiyu.interfaces.idl.MsgHandleReq;
 import com.feiyu.interfaces.idl.MsgHandleRsp;
-import com.google.protobuf.Empty;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.stereotype.Service;
 
@@ -17,13 +17,13 @@ public class MessageHandleServiceWrapper implements IMessageHandleService, Named
   private IMessageHandleService iMessageHandleService;
 
   @Override
-  public MsgHandleRsp handle(Messages.Msg message) {
-    return this.iMessageHandleService.handle(message);
+  public MsgHandleRsp handle(MsgHandleReq req) {
+    return this.iMessageHandleService.handle(req);
   }
 
   @Override
-  public CompletableFuture<MsgHandleRsp> handleAsync(Messages.Msg request) {
-    return this.iMessageHandleService.handleAsync(request);
+  public CompletableFuture<MsgHandleRsp> handleAsync(MsgHandleReq req) {
+    return this.iMessageHandleService.handleAsync(req);
   }
 
   @Override

@@ -33,5 +33,4 @@ public class QueueInfoStore {
   public static QueueInfo get(long id) {
     return idsMap.get(id);
   }
-
 }

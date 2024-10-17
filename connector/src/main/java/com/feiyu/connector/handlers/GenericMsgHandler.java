@@ -5,13 +5,12 @@ import com.feiyu.base.proto.Messages;
 import com.feiyu.connector.service.impl.MessageHandleServiceWrapper;
 import com.feiyu.connector.utils.NamedBeanProvider;
 import com.feiyu.interfaces.idl.IMessageHandleService;
+import com.feiyu.interfaces.idl.MsgHandleReq;
 import com.feiyu.interfaces.idl.MsgHandleRsp;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.Objects;
 
 /**
  * 通用消息处理器.
@@ -25,6 +24,7 @@ public class GenericMsgHandler extends SimpleChannelInboundHandler<Messages.Msg>
   private long cltMsgSeq = 0L;
 
   private final IMessageHandleService messageHandleService;
+
   public GenericMsgHandler() {
     this.messageHandleService = NamedBeanProvider.getSingleton(MessageHandleServiceWrapper.class);
   }
@@ -52,9 +52,10 @@ public class GenericMsgHandler extends SimpleChannelInboundHandler<Messages.Msg>
       return;
     }
     log.info("received msg : {}", msg);
-    this.cltMsgSeq = genericMsg.getCltSeq() + 1;
-    MsgHandleRsp msgHandleRsp = messageHandleService.handle(msg);
+    long to = msg.getGenericMsg().getPeers().getTo();
+    this.cltMsgSeq = genericMsg.getCltSeq();
+    MsgHandleRsp msgHandleRsp = messageHandleService.handle(MsgHandleReq.newBuilder().setTo(to).setMsg(msg).build());
     // 发送消息已接收确认
-    ctx.writeAndFlush(ProtocolUtil.messageRevAck(msgHandleRsp.getMsgId(), cltMsgSeq));
+    ctx.writeAndFlush(ProtocolUtil.messageRevAck(msgHandleRsp.getMsgId(), cltMsgSeq + 1));
   }
 }

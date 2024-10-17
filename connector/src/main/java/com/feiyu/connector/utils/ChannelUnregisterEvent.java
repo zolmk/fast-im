@@ -9,6 +9,6 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 public class ChannelUnregisterEvent {
-  private String uid;
+  private long uid;
   private long mq;
 }

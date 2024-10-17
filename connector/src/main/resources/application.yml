@@ -2,7 +2,7 @@ connector:
   id: 1
   boss-count: 5
   worker-count: 10
-  accept-port: 9997
+  accept-port: 9996
   so-backlog: 5000
   message-receiver: kafka
   mq-allocator: range
@@ -12,16 +12,20 @@ connector:
     -
   zk:
     connect-str: xx.xx.xx.xx:2181
-
 spring:
   profiles:
     active: dev
   application:
     name: connector
-
+  redis:
+    client-type: lettuce
+    port: 6379
+    host: xx.xx.xx.xx
 dubbo:
   application:
     name: connector
+    qos-port: 22224
+    enable-file-cache: off
   protocol:
     name: tri
     port: -1

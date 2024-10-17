@@ -1,6 +1,6 @@
 package com.feiyu.connector.service;
 
-import com.feiyu.base.Named;
+import com.feiyu.base.interfaces.Named;
 import com.feiyu.base.proto.Messages;
 
 public interface MQChooser extends Named {

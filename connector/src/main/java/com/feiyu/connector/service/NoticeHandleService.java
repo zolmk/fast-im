@@ -1,7 +1,7 @@
 package com.feiyu.connector.service;
 
-import com.feiyu.base.Named;
-import com.feiyu.base.Revocable;
+import com.feiyu.base.interfaces.Named;
+import com.feiyu.base.interfaces.Revocable;
 import com.feiyu.base.proto.Messages;
 
 /**
@@ -11,15 +11,13 @@ public interface NoticeHandleService extends Named {
 
   /**
    * 处理已送达确认
-   * @param noticeMsg
    */
-  void handleDeliveryAck(Messages.NoticeMsg noticeMsg);
+  void handleDeliveryAck(Messages.Msg msg);
 
   /**
    * 处理已读确认
-   * @param noticeMsg
    */
-  void handleReadAck(Messages.NoticeMsg noticeMsg);
+  void handleReadAck(Messages.Msg msg);
 
   /**
    * 注册可撤销的任务

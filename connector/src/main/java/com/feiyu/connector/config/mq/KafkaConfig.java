@@ -1,29 +1,15 @@
 package com.feiyu.connector.config.mq;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.feiyu.base.config.KafkaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.time.Duration;
 import java.util.Properties;
 
 @Configuration
 @ConfigurationProperties(prefix = "connector.kafka")
-@Setter
-@Getter
-public class KafkaConfig {
-  private String acks = "all";
-  private int retries = 3;
-  private int batchSize = 128;
-  private int lingerMs = 20;
-  private String consumerGroup = "connector";
-  private Duration timeout = Duration.ofMillis(200);
-  private int preEventLoopConsumerCnt = 10;
-  private int partitionNumber = 2;
-  private int replicasNumber = 1;
-
+public class KafkaConfig extends KafkaProperties {
   @Bean
   public Properties kafkaConsuemrProperties() {
     Properties props = new Properties();

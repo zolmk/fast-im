@@ -1,8 +1,7 @@
 package com.feiyu.connector.service.impl;
 
 import com.feiyu.base.QueueInfo;
-import com.feiyu.base.RetryableTask;
-import com.feiyu.base.RunOnce;
+import com.feiyu.base.interfaces.RunOnce;
 import com.feiyu.base.proto.Messages;
 import com.feiyu.connector.config.mq.KafkaConfig;
 import com.feiyu.connector.handlers.ControlMsgHandler;
@@ -16,7 +15,6 @@ import com.feiyu.connector.utils.SimpleEventLoop;
 import com.feiyu.interfaces.idl.IMessageHandleService;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -24,11 +22,11 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -40,7 +38,7 @@ import java.util.function.Consumer;
 @Slf4j
 @Service(value = "kafkaMessageReceiver")
 @ConditionalOnProperty(name = "connector.message-consumer", havingValue = "kafka", matchIfMissing = true)
-public class KafkaMessageConsumer extends AbstractMessageConsumer implements Consumer<MessageFailoverInfo> {
+public class KafkaMessageConsumer extends AbstractMessageConsumer {
   private final KafkaConfig kafkaConfig;
   // 保存 queue id 到EventLoop的映射
   private final Map<Long, MessageConsumerTask> queueTasks = new ConcurrentHashMap<>();
@@ -51,10 +49,10 @@ public class KafkaMessageConsumer extends AbstractMessageConsumer implements Con
 
   private final IMessageHandleService messageHandleService;
 
-  public KafkaMessageConsumer(KafkaConfig kafkaConfig, IMessageHandleService messageHandleService) {
+  public KafkaMessageConsumer(KafkaConfig kafkaConfig, IMessageHandleService messageHandleService, MessageFailoverConsumer failover) {
     this.kafkaConfig = kafkaConfig;
     this.messageHandleService = messageHandleService;
-    this.failoverConsumer = this;
+    this.failoverConsumer = failover;
     this.threadFactory = new MessageConsumerThreadFactory();
   }
 
@@ -84,7 +82,7 @@ public class KafkaMessageConsumer extends AbstractMessageConsumer implements Con
   public synchronized void unmount(List<QueueInfo> mqs) {
     log.info("unmount: {}", mqs);
     for (QueueInfo mq : mqs) {
-      Map<String, Channel> remove = mqMap.remove(mq.getId());
+      Map<Long, Channel> remove = mqMap.remove(mq.getId());
       // 关闭mq上绑定的用户Channel
       for (Channel channel : remove.values()) {
         if (channel.isOpen()) {
@@ -108,21 +106,6 @@ public class KafkaMessageConsumer extends AbstractMessageConsumer implements Con
     return "kafka";
   }
 
-  @Override
-  public void accept(MessageFailoverInfo messageFailoverInfo) {
-    switch (messageFailoverInfo.getReason()) {
-      case CLIENT_CLOSED: {
-        log.info("client {} closed", messageFailoverInfo.getTo());
-      } break;
-      case QUEUE_UNMOUNT: {
-
-      } break;
-      default: {
-        log.info("unknown reason: {}", messageFailoverInfo.getReason());
-      }
-    }
-  }
-
   class MessageConsumerTask implements RunOnce {
     private final KafkaConsumerWrapper kafkaConsumerWrapper;
     private volatile boolean running = true;
@@ -142,35 +125,41 @@ public class KafkaMessageConsumer extends AbstractMessageConsumer implements Con
       if (poll == null || poll.isEmpty()) {return;}
       // 将消息分发到每一个Channel
       for (ConsumerRecord<String, byte[]> record : poll) {
-        Messages.Msg msg = Messages.Msg.parseFrom(record.value());
-        String toUid = record.key();
-        Map<String, Channel> channelMap = null;
-        MessageFailoverInfo.Reason reason = MessageFailoverInfo.Reason.QUEUE_UNMOUNT;
-        if (mqMap.containsKey(qid)) {
-          channelMap = mqMap.get(qid);
-          Channel channel = channelMap.get(toUid);
-          if (channel != null && channel.isOpen()) {
-            if (Messages.MsgType.GENERIC.equals(msg.getType())) {
-              // 聊天消息
-              Messages.GenericMsg genericMsg = msg.getGenericMsg();
-              Messages.MsgExtraInfo extraInfo = genericMsg.getExtraInfo();
-              ChannelPipeline pipeline = channel.pipeline();
-              long to = pipeline.get(ControlMsgHandler.class).getClientInfo().getUid();
-              MessageSendTask messageSendTask = new MessageSendTask(3, 1, TimeUnit.SECONDS, channel, to, msg, this.failoverConsumer);
-              channel.eventLoop()
-                .schedule( messageSendTask, 0, TimeUnit.MILLISECONDS);
-              NoticeHandleService noticeHandleService = pipeline.get(NoticeMsgHandler.class).getNoticeHandleService();
+        try {
+          Messages.Msg msg = Messages.Msg.parseFrom(record.value());
+          long toUid = Long.parseLong(record.key());
+          Map<Long, Channel> channelMap = null;
+          MessageFailoverInfo.Reason reason = MessageFailoverInfo.Reason.QUEUE_UNMOUNT;
+          if (mqMap.containsKey(qid)) {
+            channelMap = mqMap.get(qid);
+            Channel channel = channelMap.get(toUid);
+            if (channel != null && channel.isOpen()) {
+              if (Messages.MsgType.GENERIC.equals(msg.getType())) {
+                // 聊天消息
+                Messages.GenericMsg genericMsg = msg.getGenericMsg();
+                Messages.MsgExtraInfo extraInfo = genericMsg.getExtraInfo();
+                ChannelPipeline pipeline = channel.pipeline();
+                // 重传逻辑
+                long to = pipeline.get(ControlMsgHandler.class).getClientInfo().getUid();
+                MessageSendTask messageSendTask = new MessageSendTask(3, 1, TimeUnit.SECONDS, channel, to, msg, this.failoverConsumer);
+                channel.eventLoop()
+                  .schedule( messageSendTask, 0, TimeUnit.MILLISECONDS);
+                NoticeHandleService noticeHandleService = pipeline.get(NoticeMsgHandler.class).getNoticeHandleService();
+                noticeHandleService.registerRevocableTask(extraInfo.getMsgId(), messageSendTask);
 
-              noticeHandleService.registerRevocableTask(extraInfo.getMsgId(), messageSendTask);
-            } else {
-              channel.writeAndFlush(msg);
+              } else {
+                // 其他消息
+                channel.writeAndFlush(msg);
+              }
+              continue;
             }
-            continue;
+            reason = MessageFailoverInfo.Reason.CLIENT_CLOSED;
           }
-          reason = MessageFailoverInfo.Reason.CLIENT_CLOSED;
+          // failed
+          failoverConsumer.accept(new MessageFailoverInfo(toUid, msg, reason));
+        } catch (Exception e) {
+          log.error("handle consumer record {} occur error.", record, e);
         }
-        // failed
-        failoverConsumer.accept(new MessageFailoverInfo(toUid, msg, reason));
       }
     }
 
@@ -182,6 +171,11 @@ public class KafkaMessageConsumer extends AbstractMessageConsumer implements Con
     @Override
     public boolean isRevoked() {
       return !running;
+    }
+
+    @Override
+    public void close() throws IOException {
+      this.kafkaConsumerWrapper.close();
     }
   }
 

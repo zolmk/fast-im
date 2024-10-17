@@ -1,6 +1,6 @@
 package com.feiyu.connector.service;
 
-import com.feiyu.base.Named;
+import com.feiyu.base.interfaces.Named;
 
 import java.util.List;
 import java.util.Map;

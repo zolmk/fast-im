@@ -40,7 +40,8 @@ public class SimpleClientLoginService implements ClientLoginService {
     // 用户登录
     if (beforeCInfo != null) {
       // 说明用户重复登录 或 重连
-      CompletableFuture<Void> postFuture = EventBus.post(new ChannelUnregisterEvent(String.valueOf(beforeCInfo.getUid()), beforeQid));
+      log.info("client {} relogin.", cInfo.getUid());
+      CompletableFuture<Void> postFuture = EventBus.post(new ChannelUnregisterEvent(beforeCInfo.getUid(), beforeQid));
       postFuture.whenCompleteAsync((unused, throwable) -> {
         if (throwable != null) {
           log.error("EventBus.post ChannelUnregisterEvent error. {}", throwable.getMessage());
@@ -59,7 +60,7 @@ public class SimpleClientLoginService implements ClientLoginService {
     if ( ! this.isOnline() || this.qid == -1 || this.clientInfo == null) {
       return;
     }
-    EventBus.post(new ChannelUnregisterEvent(String.valueOf(clientInfo.getUid()), this.qid));
+    EventBus.post(new ChannelUnregisterEvent(clientInfo.getUid(), this.qid));
     reset();
   }
 
@@ -80,7 +81,7 @@ public class SimpleClientLoginService implements ClientLoginService {
 
     CompletableFuture<Boolean> future = new CompletableFuture<>();
     // 发布客户端登录注册事件
-    CompletableFuture<Void> post = EventBus.post(new ChannelRegisterEvent(String.valueOf(clientInfo.getUid()), ctx.channel(), qid));
+    CompletableFuture<Void> post = EventBus.post(new ChannelRegisterEvent(clientInfo.getUid(), ctx.channel(), qid));
     post.whenCompleteAsync((unused, throwable) -> {
       if (throwable == null) {
         // 默认用户有未读消息
@@ -88,8 +89,8 @@ public class SimpleClientLoginService implements ClientLoginService {
         // 登录成功
         SimpleClientLoginService.this.online = true;
         future.complete(true);
+        log.info("client {} login success.", clientInfo.getUid());
       } else {
-        log.error("client {} login failed. msg: {}", clientInfo.getUid(), throwable.getMessage());
         ChannelFuture channelFuture = ctx.writeAndFlush(ProtocolUtil.CONNECT_REST);
         // 若重置连接消息发送失败，则直接关闭连接
         channelFuture.addListener((ChannelFutureListener) cf -> {
@@ -99,6 +100,7 @@ public class SimpleClientLoginService implements ClientLoginService {
         });
         // 登录失败
         future.complete(false);
+        log.error("client {} login failed. msg: {}", clientInfo.getUid(), throwable.getMessage());
       }
     });
     return future;

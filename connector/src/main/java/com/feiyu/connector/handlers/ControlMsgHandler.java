@@ -1,5 +1,6 @@
 package com.feiyu.connector.handlers;
 
+import com.feiyu.base.QueueInfoStore;
 import com.feiyu.base.proto.Messages;
 import com.feiyu.connector.service.ClientLoginService;
 import com.feiyu.connector.service.MQChooser;
@@ -33,19 +34,14 @@ public class ControlMsgHandler extends SimpleChannelInboundHandler<Messages.Msg>
   protected void channelRead0(ChannelHandlerContext ctx, Messages.Msg msg) throws Exception {
     if (Messages.MsgType.CONTROL.equals(msg.getType())) {
       Messages.ControlMsg controlMsg = msg.getControlMsg();
-      switch (controlMsg.getType()) {
-        case CLIENT_LOGIN: {
-          this.clientInfo = controlMsg.getClientInfo();
-          long qid = chooser.choice(clientInfo);
-          this.loginService.login(clientInfo, ctx, qid);
-          this.qid = qid;
-        } break;
-        case MSG_DELIVERED_FAIL: {
-          // ignore
-        } break;
-        default: {
-          log.info("unknown msg type: {}", msg.getType());
-        } break;
+      if (controlMsg.getType() == Messages.ControlType.CLIENT_LOGIN) {
+        this.clientInfo = controlMsg.getClientInfo();
+        long qid = chooser.choice(clientInfo);
+        log.info("allocate queue {} to client {}", QueueInfoStore.get(qid), clientInfo);
+        this.loginService.login(clientInfo, ctx, qid);
+        this.qid = qid;
+      } else {
+        log.info("unknown msg type: {}", msg.getType());
       }
       // 拦截所有控制消息
       return;

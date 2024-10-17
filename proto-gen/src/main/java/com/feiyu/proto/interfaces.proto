@@ -10,12 +10,26 @@ message MsgHandleRsp {
   int64 seq = 2;
 }
 
+message MsgHandleReq {
+  int64 to = 1;
+  Msg msg = 2;
+}
+
 service IMessageHandleService {
-  rpc handle(Msg) returns (MsgHandleRsp);
+  rpc handle(MsgHandleReq) returns (MsgHandleRsp);
+}
+
+message RouteReq {
+  int64 to = 1;
+  Msg msg = 2;
+}
+
+message RouteRsp {
+  int32 code = 1;
 }
 
 service IMessageRouteService {
-  rpc route(Msg) returns (google.protobuf.Empty);
+  rpc route(RouteReq) returns (RouteRsp);
 }
 
 message SequenceReq {

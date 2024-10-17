@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class ChannelRegisterEvent {
-  private final String uid;
+  private final long uid;
   private final Channel channel;
   private final long mq;
 }

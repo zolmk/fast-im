@@ -83,6 +83,7 @@ public class KafkaConsumersFactory {
       DescribeTopicsResult describeTopicsResult = adminClient.describeTopics(Collections.singleton(topicName));
       return describeTopicsResult.all().get().get(topicName);
     } catch (UnknownTopicOrPartitionException | ExecutionException | InterruptedException e) {
+      log.error("describeTopic failed", e);
       return null;
     }
   }
