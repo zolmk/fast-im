@@ -1,5 +1,6 @@
 package com.feiyu.connector.handlers;
 
+import com.feiyu.base.Constants;
 import com.feiyu.base.proto.ProtocolUtil;
 import com.feiyu.base.proto.Messages;
 import com.feiyu.connector.service.impl.MessageHandleServiceWrapper;
@@ -54,8 +55,15 @@ public class GenericMsgHandler extends SimpleChannelInboundHandler<Messages.Msg>
     log.info("received msg : {}", msg);
     long to = msg.getGenericMsg().getPeers().getTo();
     this.cltMsgSeq = genericMsg.getCltSeq();
-    MsgHandleRsp msgHandleRsp = messageHandleService.handle(MsgHandleReq.newBuilder().setTo(to).setMsg(msg).build());
-    // 发送消息已接收确认
-    ctx.writeAndFlush(ProtocolUtil.messageRevAck(msgHandleRsp.getMsgId(), cltMsgSeq + 1));
+    MsgHandleRsp rsp = messageHandleService.handle(MsgHandleReq.newBuilder().setTo(to).setMsg(msg).build());
+    Messages.Msg resultMsg = null;
+    if (Constants.MSG_SUCCESS_CODE == rsp.getCode()) {
+      // 发送消息已接收确认
+      resultMsg = ProtocolUtil.messageRevAck(rsp.getRes().getMsgId(), cltMsgSeq + 1);
+    } else {
+      // TODO 消息投递报错，反馈给客户端
+    }
+    ctx.writeAndFlush(resultMsg);
+
   }
 }

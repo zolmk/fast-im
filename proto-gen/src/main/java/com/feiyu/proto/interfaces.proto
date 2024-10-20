@@ -5,14 +5,20 @@ package com.feiyu.interfaces.idl;
 import "messages.proto";
 import "google/protobuf/empty.proto";
 
-message MsgHandleRsp {
-  int64 msgId = 1;
-  int64 seq = 2;
-}
 
 message MsgHandleReq {
   int64 to = 1;
   Msg msg = 2;
+}
+
+message MsgHandleRsp {
+  int32 code = 1;
+  GenericMsgHandleResult res = 2;
+}
+
+message GenericMsgHandleResult {
+  int64 msgId = 1;
+  int64 seq = 2;
 }
 
 service IMessageHandleService {

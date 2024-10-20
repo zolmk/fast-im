@@ -39,26 +39,42 @@ private static final long serialVersionUID = 0L;
             com.feiyu.interfaces.idl.MsgHandleRsp.class, com.feiyu.interfaces.idl.MsgHandleRsp.Builder.class);
   }
 
-  public static final int MSGID_FIELD_NUMBER = 1;
-  private long msgId_ = 0L;
+  private int bitField0_;
+  public static final int CODE_FIELD_NUMBER = 1;
+  private int code_ = 0;
   /**
-   * <code>int64 msgId = 1;</code>
-   * @return The msgId.
+   * <code>int32 code = 1;</code>
+   * @return The code.
    */
   @java.lang.Override
-  public long getMsgId() {
-    return msgId_;
+  public int getCode() {
+    return code_;
   }
 
-  public static final int SEQ_FIELD_NUMBER = 2;
-  private long seq_ = 0L;
+  public static final int RES_FIELD_NUMBER = 2;
+  private com.feiyu.interfaces.idl.GenericMsgHandleResult res_;
   /**
-   * <code>int64 seq = 2;</code>
-   * @return The seq.
+   * <code>.com.feiyu.interfaces.idl.GenericMsgHandleResult res = 2;</code>
+   * @return Whether the res field is set.
    */
   @java.lang.Override
-  public long getSeq() {
-    return seq_;
+  public boolean hasRes() {
+    return ((bitField0_ & 0x00000001) != 0);
+  }
+  /**
+   * <code>.com.feiyu.interfaces.idl.GenericMsgHandleResult res = 2;</code>
+   * @return The res.
+   */
+  @java.lang.Override
+  public com.feiyu.interfaces.idl.GenericMsgHandleResult getRes() {
+    return res_ == null ? com.feiyu.interfaces.idl.GenericMsgHandleResult.getDefaultInstance() : res_;
+  }
+  /**
+   * <code>.com.feiyu.interfaces.idl.GenericMsgHandleResult res = 2;</code>
+   */
+  @java.lang.Override
+  public com.feiyu.interfaces.idl.GenericMsgHandleResultOrBuilder getResOrBuilder() {
+    return res_ == null ? com.feiyu.interfaces.idl.GenericMsgHandleResult.getDefaultInstance() : res_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -75,11 +91,11 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (msgId_ != 0L) {
-      output.writeInt64(1, msgId_);
+    if (code_ != 0) {
+      output.writeInt32(1, code_);
     }
-    if (seq_ != 0L) {
-      output.writeInt64(2, seq_);
+    if (((bitField0_ & 0x00000001) != 0)) {
+      output.writeMessage(2, getRes());
     }
     getUnknownFields().writeTo(output);
   }
@@ -90,13 +106,13 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (msgId_ != 0L) {
+    if (code_ != 0) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt64Size(1, msgId_);
+        .computeInt32Size(1, code_);
     }
-    if (seq_ != 0L) {
+    if (((bitField0_ & 0x00000001) != 0)) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt64Size(2, seq_);
+        .computeMessageSize(2, getRes());
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -113,10 +129,13 @@ private static final long serialVersionUID = 0L;
     }
     com.feiyu.interfaces.idl.MsgHandleRsp other = (com.feiyu.interfaces.idl.MsgHandleRsp) obj;
 
-    if (getMsgId()
-        != other.getMsgId()) return false;
-    if (getSeq()
-        != other.getSeq()) return false;
+    if (getCode()
+        != other.getCode()) return false;
+    if (hasRes() != other.hasRes()) return false;
+    if (hasRes()) {
+      if (!getRes()
+          .equals(other.getRes())) return false;
+    }
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -128,12 +147,12 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + MSGID_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-        getMsgId());
-    hash = (37 * hash) + SEQ_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-        getSeq());
+    hash = (37 * hash) + CODE_FIELD_NUMBER;
+    hash = (53 * hash) + getCode();
+    if (hasRes()) {
+      hash = (37 * hash) + RES_FIELD_NUMBER;
+      hash = (53 * hash) + getRes().hashCode();
+    }
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -253,20 +272,30 @@ private static final long serialVersionUID = 0L;
 
     // Construct using com.feiyu.interfaces.idl.MsgHandleRsp.newBuilder()
     private Builder() {
-
+      maybeForceBuilderInitialization();
     }
 
     private Builder(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       super(parent);
-
+      maybeForceBuilderInitialization();
+    }
+    private void maybeForceBuilderInitialization() {
+      if (com.google.protobuf.GeneratedMessageV3
+              .alwaysUseFieldBuilders) {
+        getResFieldBuilder();
+      }
     }
     @java.lang.Override
     public Builder clear() {
       super.clear();
       bitField0_ = 0;
-      msgId_ = 0L;
-      seq_ = 0L;
+      code_ = 0;
+      res_ = null;
+      if (resBuilder_ != null) {
+        resBuilder_.dispose();
+        resBuilder_ = null;
+      }
       return this;
     }
 
@@ -301,11 +330,16 @@ private static final long serialVersionUID = 0L;
     private void buildPartial0(com.feiyu.interfaces.idl.MsgHandleRsp result) {
       int from_bitField0_ = bitField0_;
       if (((from_bitField0_ & 0x00000001) != 0)) {
-        result.msgId_ = msgId_;
+        result.code_ = code_;
       }
+      int to_bitField0_ = 0;
       if (((from_bitField0_ & 0x00000002) != 0)) {
-        result.seq_ = seq_;
+        result.res_ = resBuilder_ == null
+            ? res_
+            : resBuilder_.build();
+        to_bitField0_ |= 0x00000001;
       }
+      result.bitField0_ |= to_bitField0_;
     }
 
     @java.lang.Override
@@ -352,11 +386,11 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(com.feiyu.interfaces.idl.MsgHandleRsp other) {
       if (other == com.feiyu.interfaces.idl.MsgHandleRsp.getDefaultInstance()) return this;
-      if (other.getMsgId() != 0L) {
-        setMsgId(other.getMsgId());
+      if (other.getCode() != 0) {
+        setCode(other.getCode());
       }
-      if (other.getSeq() != 0L) {
-        setSeq(other.getSeq());
+      if (other.hasRes()) {
+        mergeRes(other.getRes());
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -385,15 +419,17 @@ private static final long serialVersionUID = 0L;
               done = true;
               break;
             case 8: {
-              msgId_ = input.readInt64();
+              code_ = input.readInt32();
               bitField0_ |= 0x00000001;
               break;
             } // case 8
-            case 16: {
-              seq_ = input.readInt64();
+            case 18: {
+              input.readMessage(
+                  getResFieldBuilder().getBuilder(),
+                  extensionRegistry);
               bitField0_ |= 0x00000002;
               break;
-            } // case 16
+            } // case 18
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -411,68 +447,157 @@ private static final long serialVersionUID = 0L;
     }
     private int bitField0_;
 
-    private long msgId_ ;
+    private int code_ ;
     /**
-     * <code>int64 msgId = 1;</code>
-     * @return The msgId.
+     * <code>int32 code = 1;</code>
+     * @return The code.
      */
     @java.lang.Override
-    public long getMsgId() {
-      return msgId_;
+    public int getCode() {
+      return code_;
     }
     /**
-     * <code>int64 msgId = 1;</code>
-     * @param value The msgId to set.
+     * <code>int32 code = 1;</code>
+     * @param value The code to set.
      * @return This builder for chaining.
      */
-    public Builder setMsgId(long value) {
+    public Builder setCode(int value) {
 
-      msgId_ = value;
+      code_ = value;
       bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
     /**
-     * <code>int64 msgId = 1;</code>
+     * <code>int32 code = 1;</code>
      * @return This builder for chaining.
      */
-    public Builder clearMsgId() {
+    public Builder clearCode() {
       bitField0_ = (bitField0_ & ~0x00000001);
-      msgId_ = 0L;
+      code_ = 0;
       onChanged();
       return this;
     }
 
-    private long seq_ ;
+    private com.feiyu.interfaces.idl.GenericMsgHandleResult res_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        com.feiyu.interfaces.idl.GenericMsgHandleResult, com.feiyu.interfaces.idl.GenericMsgHandleResult.Builder, com.feiyu.interfaces.idl.GenericMsgHandleResultOrBuilder> resBuilder_;
     /**
-     * <code>int64 seq = 2;</code>
-     * @return The seq.
+     * <code>.com.feiyu.interfaces.idl.GenericMsgHandleResult res = 2;</code>
+     * @return Whether the res field is set.
      */
-    @java.lang.Override
-    public long getSeq() {
-      return seq_;
+    public boolean hasRes() {
+      return ((bitField0_ & 0x00000002) != 0);
     }
     /**
-     * <code>int64 seq = 2;</code>
-     * @param value The seq to set.
-     * @return This builder for chaining.
+     * <code>.com.feiyu.interfaces.idl.GenericMsgHandleResult res = 2;</code>
+     * @return The res.
      */
-    public Builder setSeq(long value) {
-
-      seq_ = value;
+    public com.feiyu.interfaces.idl.GenericMsgHandleResult getRes() {
+      if (resBuilder_ == null) {
+        return res_ == null ? com.feiyu.interfaces.idl.GenericMsgHandleResult.getDefaultInstance() : res_;
+      } else {
+        return resBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.com.feiyu.interfaces.idl.GenericMsgHandleResult res = 2;</code>
+     */
+    public Builder setRes(com.feiyu.interfaces.idl.GenericMsgHandleResult value) {
+      if (resBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        res_ = value;
+      } else {
+        resBuilder_.setMessage(value);
+      }
       bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
     /**
-     * <code>int64 seq = 2;</code>
-     * @return This builder for chaining.
+     * <code>.com.feiyu.interfaces.idl.GenericMsgHandleResult res = 2;</code>
      */
-    public Builder clearSeq() {
-      bitField0_ = (bitField0_ & ~0x00000002);
-      seq_ = 0L;
+    public Builder setRes(
+        com.feiyu.interfaces.idl.GenericMsgHandleResult.Builder builderForValue) {
+      if (resBuilder_ == null) {
+        res_ = builderForValue.build();
+      } else {
+        resBuilder_.setMessage(builderForValue.build());
+      }
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
+    }
+    /**
+     * <code>.com.feiyu.interfaces.idl.GenericMsgHandleResult res = 2;</code>
+     */
+    public Builder mergeRes(com.feiyu.interfaces.idl.GenericMsgHandleResult value) {
+      if (resBuilder_ == null) {
+        if (((bitField0_ & 0x00000002) != 0) &&
+          res_ != null &&
+          res_ != com.feiyu.interfaces.idl.GenericMsgHandleResult.getDefaultInstance()) {
+          getResBuilder().mergeFrom(value);
+        } else {
+          res_ = value;
+        }
+      } else {
+        resBuilder_.mergeFrom(value);
+      }
+      if (res_ != null) {
+        bitField0_ |= 0x00000002;
+        onChanged();
+      }
+      return this;
+    }
+    /**
+     * <code>.com.feiyu.interfaces.idl.GenericMsgHandleResult res = 2;</code>
+     */
+    public Builder clearRes() {
+      bitField0_ = (bitField0_ & ~0x00000002);
+      res_ = null;
+      if (resBuilder_ != null) {
+        resBuilder_.dispose();
+        resBuilder_ = null;
+      }
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>.com.feiyu.interfaces.idl.GenericMsgHandleResult res = 2;</code>
+     */
+    public com.feiyu.interfaces.idl.GenericMsgHandleResult.Builder getResBuilder() {
+      bitField0_ |= 0x00000002;
+      onChanged();
+      return getResFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>.com.feiyu.interfaces.idl.GenericMsgHandleResult res = 2;</code>
+     */
+    public com.feiyu.interfaces.idl.GenericMsgHandleResultOrBuilder getResOrBuilder() {
+      if (resBuilder_ != null) {
+        return resBuilder_.getMessageOrBuilder();
+      } else {
+        return res_ == null ?
+            com.feiyu.interfaces.idl.GenericMsgHandleResult.getDefaultInstance() : res_;
+      }
+    }
+    /**
+     * <code>.com.feiyu.interfaces.idl.GenericMsgHandleResult res = 2;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        com.feiyu.interfaces.idl.GenericMsgHandleResult, com.feiyu.interfaces.idl.GenericMsgHandleResult.Builder, com.feiyu.interfaces.idl.GenericMsgHandleResultOrBuilder> 
+        getResFieldBuilder() {
+      if (resBuilder_ == null) {
+        resBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            com.feiyu.interfaces.idl.GenericMsgHandleResult, com.feiyu.interfaces.idl.GenericMsgHandleResult.Builder, com.feiyu.interfaces.idl.GenericMsgHandleResultOrBuilder>(
+                getRes(),
+                getParentForChildren(),
+                isClean());
+        res_ = null;
+      }
+      return resBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

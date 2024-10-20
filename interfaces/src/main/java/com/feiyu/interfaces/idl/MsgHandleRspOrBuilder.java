@@ -9,14 +9,23 @@ public interface MsgHandleRspOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>int64 msgId = 1;</code>
-   * @return The msgId.
+   * <code>int32 code = 1;</code>
+   * @return The code.
    */
-  long getMsgId();
+  int getCode();
 
   /**
-   * <code>int64 seq = 2;</code>
-   * @return The seq.
+   * <code>.com.feiyu.interfaces.idl.GenericMsgHandleResult res = 2;</code>
+   * @return Whether the res field is set.
    */
-  long getSeq();
+  boolean hasRes();
+  /**
+   * <code>.com.feiyu.interfaces.idl.GenericMsgHandleResult res = 2;</code>
+   * @return The res.
+   */
+  com.feiyu.interfaces.idl.GenericMsgHandleResult getRes();
+  /**
+   * <code>.com.feiyu.interfaces.idl.GenericMsgHandleResult res = 2;</code>
+   */
+  com.feiyu.interfaces.idl.GenericMsgHandleResultOrBuilder getResOrBuilder();
 }

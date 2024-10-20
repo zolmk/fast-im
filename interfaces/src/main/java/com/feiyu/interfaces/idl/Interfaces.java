@@ -16,15 +16,20 @@ public final class Interfaces {
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
   static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_com_feiyu_interfaces_idl_MsgHandleReq_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_com_feiyu_interfaces_idl_MsgHandleReq_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_com_feiyu_interfaces_idl_MsgHandleRsp_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_com_feiyu_interfaces_idl_MsgHandleRsp_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_com_feiyu_interfaces_idl_MsgHandleReq_descriptor;
+    internal_static_com_feiyu_interfaces_idl_GenericMsgHandleResult_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_com_feiyu_interfaces_idl_MsgHandleReq_fieldAccessorTable;
+      internal_static_com_feiyu_interfaces_idl_GenericMsgHandleResult_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
     internal_static_com_feiyu_interfaces_idl_RouteReq_descriptor;
   static final 
@@ -56,21 +61,23 @@ public final class Interfaces {
     java.lang.String[] descriptorData = {
       "\n\020interfaces.proto\022\030com.feiyu.interfaces" +
       ".idl\032\016messages.proto\032\033google/protobuf/em" +
-      "pty.proto\"*\n\014MsgHandleRsp\022\r\n\005msgId\030\001 \001(\003" +
-      "\022\013\n\003seq\030\002 \001(\003\"-\n\014MsgHandleReq\022\n\n\002to\030\001 \001(" +
-      "\003\022\021\n\003msg\030\002 \001(\0132\004.Msg\")\n\010RouteReq\022\n\n\002to\030\001" +
-      " \001(\003\022\021\n\003msg\030\002 \001(\0132\004.Msg\"\030\n\010RouteRsp\022\014\n\004c" +
-      "ode\030\001 \001(\005\"\032\n\013SequenceReq\022\013\n\003uid\030\001 \001(\003\"\032\n" +
-      "\013SequenceRsp\022\013\n\003seq\030\001 \001(\0032q\n\025IMessageHan" +
-      "dleService\022X\n\006handle\022&.com.feiyu.interfa" +
-      "ces.idl.MsgHandleReq\032&.com.feiyu.interfa" +
-      "ces.idl.MsgHandleRsp2g\n\024IMessageRouteSer" +
-      "vice\022O\n\005route\022\".com.feiyu.interfaces.idl" +
-      ".RouteReq\032\".com.feiyu.interfaces.idl.Rou" +
-      "teRsp2g\n\020ISequenceService\022S\n\003gen\022%.com.f" +
-      "eiyu.interfaces.idl.SequenceReq\032%.com.fe" +
-      "iyu.interfaces.idl.SequenceRspB\002P\001b\006prot" +
-      "o3"
+      "pty.proto\"-\n\014MsgHandleReq\022\n\n\002to\030\001 \001(\003\022\021\n" +
+      "\003msg\030\002 \001(\0132\004.Msg\"[\n\014MsgHandleRsp\022\014\n\004code" +
+      "\030\001 \001(\005\022=\n\003res\030\002 \001(\01320.com.feiyu.interfac" +
+      "es.idl.GenericMsgHandleResult\"4\n\026Generic" +
+      "MsgHandleResult\022\r\n\005msgId\030\001 \001(\003\022\013\n\003seq\030\002 " +
+      "\001(\003\")\n\010RouteReq\022\n\n\002to\030\001 \001(\003\022\021\n\003msg\030\002 \001(\013" +
+      "2\004.Msg\"\030\n\010RouteRsp\022\014\n\004code\030\001 \001(\005\"\032\n\013Sequ" +
+      "enceReq\022\013\n\003uid\030\001 \001(\003\"\032\n\013SequenceRsp\022\013\n\003s" +
+      "eq\030\001 \001(\0032q\n\025IMessageHandleService\022X\n\006han" +
+      "dle\022&.com.feiyu.interfaces.idl.MsgHandle" +
+      "Req\032&.com.feiyu.interfaces.idl.MsgHandle" +
+      "Rsp2g\n\024IMessageRouteService\022O\n\005route\022\".c" +
+      "om.feiyu.interfaces.idl.RouteReq\032\".com.f" +
+      "eiyu.interfaces.idl.RouteRsp2g\n\020ISequenc" +
+      "eService\022S\n\003gen\022%.com.feiyu.interfaces.i" +
+      "dl.SequenceReq\032%.com.feiyu.interfaces.id" +
+      "l.SequenceRspB\002P\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -78,38 +85,44 @@ public final class Interfaces {
           com.feiyu.base.proto.Messages.getDescriptor(),
           com.google.protobuf.EmptyProto.getDescriptor(),
         });
-    internal_static_com_feiyu_interfaces_idl_MsgHandleRsp_descriptor =
-      getDescriptor().getMessageTypes().get(0);
-    internal_static_com_feiyu_interfaces_idl_MsgHandleRsp_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_com_feiyu_interfaces_idl_MsgHandleRsp_descriptor,
-        new java.lang.String[] { "MsgId", "Seq", });
     internal_static_com_feiyu_interfaces_idl_MsgHandleReq_descriptor =
-      getDescriptor().getMessageTypes().get(1);
+      getDescriptor().getMessageTypes().get(0);
     internal_static_com_feiyu_interfaces_idl_MsgHandleReq_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_feiyu_interfaces_idl_MsgHandleReq_descriptor,
         new java.lang.String[] { "To", "Msg", });
-    internal_static_com_feiyu_interfaces_idl_RouteReq_descriptor =
+    internal_static_com_feiyu_interfaces_idl_MsgHandleRsp_descriptor =
+      getDescriptor().getMessageTypes().get(1);
+    internal_static_com_feiyu_interfaces_idl_MsgHandleRsp_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_com_feiyu_interfaces_idl_MsgHandleRsp_descriptor,
+        new java.lang.String[] { "Code", "Res", });
+    internal_static_com_feiyu_interfaces_idl_GenericMsgHandleResult_descriptor =
       getDescriptor().getMessageTypes().get(2);
+    internal_static_com_feiyu_interfaces_idl_GenericMsgHandleResult_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_com_feiyu_interfaces_idl_GenericMsgHandleResult_descriptor,
+        new java.lang.String[] { "MsgId", "Seq", });
+    internal_static_com_feiyu_interfaces_idl_RouteReq_descriptor =
+      getDescriptor().getMessageTypes().get(3);
     internal_static_com_feiyu_interfaces_idl_RouteReq_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_feiyu_interfaces_idl_RouteReq_descriptor,
         new java.lang.String[] { "To", "Msg", });
     internal_static_com_feiyu_interfaces_idl_RouteRsp_descriptor =
-      getDescriptor().getMessageTypes().get(3);
+      getDescriptor().getMessageTypes().get(4);
     internal_static_com_feiyu_interfaces_idl_RouteRsp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_feiyu_interfaces_idl_RouteRsp_descriptor,
         new java.lang.String[] { "Code", });
     internal_static_com_feiyu_interfaces_idl_SequenceReq_descriptor =
-      getDescriptor().getMessageTypes().get(4);
+      getDescriptor().getMessageTypes().get(5);
     internal_static_com_feiyu_interfaces_idl_SequenceReq_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_feiyu_interfaces_idl_SequenceReq_descriptor,
         new java.lang.String[] { "Uid", });
     internal_static_com_feiyu_interfaces_idl_SequenceRsp_descriptor =
-      getDescriptor().getMessageTypes().get(5);
+      getDescriptor().getMessageTypes().get(6);
     internal_static_com_feiyu_interfaces_idl_SequenceRsp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_feiyu_interfaces_idl_SequenceRsp_descriptor,
