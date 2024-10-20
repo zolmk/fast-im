@@ -10,7 +10,6 @@
     <version>1.0.1</version>
     <modules>
         <module>route</module>
-        <module>storage</module>
         <module>connector</module>
         <module>core</module>
         <module>base</module>
