@@ -4,3 +4,8 @@ dubbo:
 spring:
   redis:
     host: 111.230.15.9
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://111.230.15.9:3306/fast_im?useUnicode=true&characterEncoding=gbk&autoReconnect=true&failOverReadOnly=false
+    username: root
+    password: zolmk!@#.

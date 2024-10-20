@@ -16,6 +16,10 @@ public class SimpleMsgIdentifierService implements MsgIdentifierService {
   private ISequenceService sequenceService;
   private AtomicInteger id = new AtomicInteger(1);
 
+  public SimpleMsgIdentifierService() {
+  }
+
+
   @Override
   public long newId() {
     return id.getAndIncrement();

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.feiyu.core.mappers.ClientInfoMapper">
+    <resultMap id="clientInfo" type="com.feiyu.core.entity.ClientInfo">
+        <result property="clId" column="cl_id"/>
+        <result property="id" column="id"/>
+        <result property="bounds" column="bounds"/>
+        <result property="seq" column="seq"/>
+    </resultMap>
+
+</mapper>

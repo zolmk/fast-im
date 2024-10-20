@@ -3,7 +3,9 @@ package com.feiyu.core.service.impl;
 import com.feiyu.base.proto.Messages;
 import com.feiyu.core.service.MsgIdentifierService;
 import com.feiyu.core.service.MsgInternalHandleService;
+import com.feiyu.core.util.ConvertUtil;
 import com.feiyu.interfaces.idl.*;
+import com.feiyu.core.service.IMsgService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
@@ -17,9 +19,11 @@ public class MessageHandleService implements IMessageHandleService, MsgInternalH
   @DubboReference
   private IMessageRouteService messageRouteService;
   private final MsgIdentifierService identifierService;
+  private final IMsgService iMsgService;
 
-  public MessageHandleService(MsgIdentifierService msgIdentifierService) {
+  public MessageHandleService(MsgIdentifierService msgIdentifierService, IMsgService iMsgService) {
     this.identifierService = msgIdentifierService;
+    this.iMsgService = iMsgService;
   }
 
   @Override
@@ -83,6 +87,10 @@ public class MessageHandleService implements IMessageHandleService, MsgInternalH
   public MsgHandleRsp handleGeneric(MsgHandleReq req) {
     long msgId = identifierService.newId();
     long seq = identifierService.newSeq(req.getTo());
+
+    // 保存消息
+    iMsgService.save(ConvertUtil.toEntityMsg(req.getMsg()));
+
     Messages.Msg msg = setMsgIdAndSeq(req.getMsg(), msgId, seq);
     RouteReq routeReq = RouteReq.newBuilder().setMsg(msg).setTo(req.getTo()).build();
     RouteRsp route = messageRouteService.route(routeReq);
