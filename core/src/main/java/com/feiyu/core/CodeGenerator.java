@@ -47,7 +47,7 @@ public class CodeGenerator {
     GlobalConfig gc = new GlobalConfig();
     String projectPath = System.getProperty("user.dir");
 
-    gc.setOutputDir(projectPath + "/storage/src/main/java");
+    gc.setOutputDir(projectPath + "/core/src/main/java");
     gc.setAuthor("julian");
     gc.setOpen(false);
     // gc.setSwagger2(true); 实体属性 Swagger2 注解
@@ -88,7 +88,7 @@ public class CodeGenerator {
       @Override
       public String outputFile(TableInfo tableInfo) {
         // 自定义输出文件名 ， 如果你 Entity 设置了前后缀、此处注意 xml 的名称会跟着发生变化！！
-        return projectPath + "/src/main/resources/mapper/" + tableInfo.getEntityName() + "Mapper" + StringPool.DOT_XML;
+        return projectPath + "/core/src/main/resources/com/feiyu/core/mappers/" + tableInfo.getEntityName() + "Mapper" + StringPool.DOT_XML;
       }
     });
         /*
@@ -119,8 +119,8 @@ public class CodeGenerator {
     // templateConfig.setController();
 
     templateConfig.setXml(null)
-      .setEntity("templates/entity.java.vm") // 设置实体类模板路径
-      .setMapper("templates/mapper.java.vm"); // 设置Mapper接口模板路径
+      .setEntity("templates/entity.java") // 设置实体类模板路径
+      .setMapper("templates/mapper.java"); // 设置Mapper接口模板路径
 
     mpg.setTemplate(templateConfig);
 
